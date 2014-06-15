@@ -95,5 +95,6 @@ def dfs_traverse(self, cell):
         number_of_cells += 1
 
         # for adj_cell in visiting_cell.adjacents:
+            
 
 
