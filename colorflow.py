@@ -4,14 +4,16 @@ class Cell:
     color = ""
     x = ""
     y = ""
-    visited = False
-    #Adjacent order   N   E   S   W
-    adjacents =     ["", "", "", ""]
+    visited = ""
+    adjacents = ""
 
     def __init__(self, color, (numx, numy)):
         self.color = color
         self.x = numx
         self.y = numy
+        self.visited = False
+        #Adjacent order   N   E   S   W
+        self.adjacents = ["", "", "", ""]
 
     def __str__(self):
         return str(self.color) + '(' + str(self.x) + ', ' + str(self.y) + ')'
@@ -27,11 +29,12 @@ class Cell:
             adjacents[3] = Cell
 
     def visit(self):
-        visited = True
+        self.visited = True
 
     def is_visited(self):
-        return visited
+        return self.visited
 
+    #If this cell is out of bounds, its color shall be 0.
     def is_out_of_bounds(self):
         return color == 0
 
@@ -48,53 +51,77 @@ for x in range(0, len(matrix)):
     for y in range(0, len(matrix[x])):
         rand_color = 7
         matrix[x][y] = Cell(rand_color, (x,y))
-        print(matrix[x][y])
 
 
 #Make and set adjacents
 for x in range(0, len(matrix)):
     for y in range(0, len(matrix[x])):
-        cell = matrix[x][y]
+        fcell = matrix[x][y]
         xw = x - 1
         xe = x + 1
         yn = y - 1
         ys = y + 1
 
+
         if yn < 0:
-            cell.adjacents[0] = Cell(0, (x, yn))
+            fcell.adjacents[0] = Cell(0, (x, yn))
         else:
-            cell.adjacents[0] = matrix[x][yn]
+            fcell.adjacents[0] = matrix[x][yn]
 
         if xe >= len(matrix):
-            cell.adjacents[1] = Cell(0, (xe, y))
+            fcell.adjacents[1] = Cell(0, (xe, y))
         else:
-            cell.adjacents[1] = matrix[xe][y]
+            fcell.adjacents[1] = matrix[xe][y]
 
         if ys >= len(matrix):
-            cell.adjacents[2] = Cell(0, (x, ys))
+            fcell.adjacents[2] = Cell(0, (x, ys))
         else:
-            cell.adjacents[2] = matrix[x][ys]
+            fcell.adjacents[2] = matrix[x][ys]
 
         if xw < 0:
-            cell.adjacents[3] = Cell(0, (xw, y))
+            fcell.adjacents[3] = Cell(0, (xw, y))
         else:
-            cell.adjacents[3] = matrix[xw][y]
+            fcell.adjacents[3] = matrix[xw][y]
+
+        print(fcell)
+        print(" " + str(fcell.adjacents[0]))
+        print(" " + str(fcell.adjacents[1]))
+        print(" " + str(fcell.adjacents[2]))
+        print(" " + str(fcell.adjacents[3]))
+
+
+print("and lastly")
+cell1 = matrix[1][0]
+print(cell1)
+print(" " + str(cell1.adjacents[0]))
+print(" " + str(cell1.adjacents[1]))
+print(" " + str(cell1.adjacents[2]))
+print(" " + str(cell1.adjacents[3]))
 
 #Depth First Search
-def dfs_traverse(self, cell):
-    visited_cells = 0
-    open_list = [cell]
-    number_of_cells = len(matrix) * len(matrix)
+def traversal_algorithm1(cell):
+    visited_cell_count = 0
+    total_cell_count = len(matrix) * len(matrix)
+    open_cells = [cell]
 
-    while visited_cells != number_of_cells and len(open_list) > 0:
-        while open_list[-1].is_visited:
-            open_list.pop()
+    while visited_cell_count != total_cell_count and len(open_cells) > 0:
+        while open_cells[-1].is_visited():
+            open_cells.pop()
 
-        visiting_cell = open_list.pop()
-        visiting_cell.visit()
-        number_of_cells += 1
+        current_cell = open_cells.pop()
+        current_cell.visit()
+        visited_cell_count += 1
+        c = 0
 
-        # for adj_cell in visiting_cell.adjacents:
-            
+        print(current_cell)
+        for adj_cell in current_cell.adjacents:
+            print(" " + str(adj_cell))
+            if not adj_cell.is_out_of_bounds:
+                open_cells.append(adj_cell)
+                c += 1
 
+    print(str(visited_cell_count) + " cells have been visited")
 
+cell = matrix[0][0]
+slist = [cell]
+traversal_algorithm1(cell)
