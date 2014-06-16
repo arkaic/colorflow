@@ -36,7 +36,7 @@ class Cell:
 
     #If this cell is out of bounds, its color shall be 0.
     def is_out_of_bounds(self):
-        return color == 0
+        return self.color == 0
 
 
 length = raw_input('What length do you want for the matrix?: ')
@@ -89,7 +89,9 @@ for x in range(0, len(matrix)):
         print(" " + str(fcell.adjacents[2]))
         print(" " + str(fcell.adjacents[3]))
 
-
+print("")
+print("Matrix created.........")
+print("")
 print("and lastly")
 cell1 = matrix[1][0]
 print(cell1)
@@ -98,6 +100,8 @@ print(" " + str(cell1.adjacents[1]))
 print(" " + str(cell1.adjacents[2]))
 print(" " + str(cell1.adjacents[3]))
 
+print("")
+print("traversal algorithm begins...")
 #Depth First Search
 def traversal_algorithm1(cell):
     visited_cell_count = 0
@@ -115,10 +119,11 @@ def traversal_algorithm1(cell):
 
         print(current_cell)
         for adj_cell in current_cell.adjacents:
-            print(" " + str(adj_cell))
-            if not adj_cell.is_out_of_bounds:
+            # print(" " + str(adj_cell) + " and color is " + str(adj_cell.color))
+            if not adj_cell.is_out_of_bounds():
                 open_cells.append(adj_cell)
                 c += 1
+                print("appended")
 
     print(str(visited_cell_count) + " cells have been visited")
 
