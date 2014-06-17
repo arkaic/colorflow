@@ -38,6 +38,18 @@ class Cell:
     def is_out_of_bounds(self):
         return self.color == 0
 
+class Matrix:
+    array = ""
+    length = ""
+
+    def __init__(self, n):
+        self.array = [[0 for x in xrange(int(n)) for y in xrange(int(n))]]
+        self.length = n
+
+    def get(self, x, y):
+        return array[x][y]
+
+    # def __str__(self):
 
 length = raw_input('What length do you want for the matrix?: ')
 
@@ -102,7 +114,7 @@ print("")
 # consecutive cells on top of the stack that are already visited will be 
 # removed. The next cell on top of the stack, hence, is unvisited. It will be
 # set to "visited" and then all of its adjacent cells are added onto the stack. 
-def traversal_algorithm1(cell):
+def traversal_algorithm1(cell, color):
     visited_cell_count = 0
     total_cell_count = len(matrix) * len(matrix)
     unvisited_cells = [cell]
@@ -122,6 +134,7 @@ def traversal_algorithm1(cell):
         print(current_cell)
         for adj_cell in current_cell.adjacents:
             if not adj_cell.is_out_of_bounds():
+                if adj_cell.color == color
                 unvisited_cells.append(adj_cell)
                 print("appended")
 
@@ -132,3 +145,10 @@ def traversal_algorithm1(cell):
 cell = matrix[0][0]
 slist = [cell]
 traversal_algorithm1(cell)
+
+
+
+#Notes
+# 123456789
+# __________
+# 7|8|9|1|2|3|4
