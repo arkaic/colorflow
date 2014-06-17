@@ -18,15 +18,15 @@ class Cell:
     def __str__(self):
         return str(self.color) + '(' + str(self.x) + ', ' + str(self.y) + ')'
 
-    def set_adjacent(self, Cell, direction):
+    def set_adjacent(self, cell, direction):
         if direction == 'N':
-            adjacents[0] = Cell
+            self.adjacents[0] = cell
         elif direction == 'E':
-            adjacents[1] = Cell
+            self.adjacents[1] = cell
         elif direction == 'S':
-            adjacents[2] = Cell
+            self.adjacents[2] = cell
         elif direction == 'W':
-            adjacents[3] = Cell
+            self.adjacents[3] = cell
 
     def visit(self):
         self.visited = True
@@ -62,26 +62,25 @@ for x in range(0, len(matrix)):
         yn = y - 1
         ys = y + 1
 
-
         if yn < 0:
-            fcell.adjacents[0] = Cell(0, (x, yn))
+            fcell.set_adjacent(Cell(0, (x, yn)), "N")
         else:
-            fcell.adjacents[0] = matrix[x][yn]
+            fcell.set_adjacent(matrix[x][yn], "N")
 
         if xe >= len(matrix):
-            fcell.adjacents[1] = Cell(0, (xe, y))
-        else:
-            fcell.adjacents[1] = matrix[xe][y]
+            fcell.set_adjacent(Cell(0, (xe, y)), "E")
+        else: 
+            fcell.set_adjacent(matrix[xe][y], "E")
 
         if ys >= len(matrix):
-            fcell.adjacents[2] = Cell(0, (x, ys))
+            fcell.set_adjacent(Cell(0, (x, ys)), "S")
         else:
-            fcell.adjacents[2] = matrix[x][ys]
+            fcell.set_adjacent(matrix[x][ys], "S")
 
         if xw < 0:
-            fcell.adjacents[3] = Cell(0, (xw, y))
+            fcell.set_adjacent(Cell(0, (xw, y)), "W")
         else:
-            fcell.adjacents[3] = matrix[xw][y]
+            fcell.set_adjacent(matrix[xw][y], "W")
 
         print(fcell)
         print(" " + str(fcell.adjacents[0]))
