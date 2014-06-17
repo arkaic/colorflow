@@ -1,3 +1,5 @@
+import random
+
 #Cell holding the coordinate and color
 #Null cell will have color = 0
 class Cell: 
@@ -31,6 +33,9 @@ class Cell:
     def visit(self):
         self.visited = True
 
+    def unvisit(self):
+        self.visited = False
+
     def is_visited(self):
         return self.visited
 
@@ -41,42 +46,49 @@ class Cell:
 class Matrix:
     array = ""
     length = ""
+    size = ""
+    uniform_color_count = 1
 
     def __init__(self, n):
         self.array = [[0 for x in xrange(int(n))] for y in xrange(int(n))]
         self.length = n
+        self.size = n * n
+        random.seed()
+        for x in range(0, self.length):
+            for y in range(0, self.length):
+                random_color = random.randint(1, 7)
+                self.array[x][y] = Cell(random_color, (x, y))
 
     def get(self, x, y):
         return self.array[x][y]
 
     def __str__(self):
         string = ""
-        for y in range(0, length):
-            for x in range(0, length):
-                string += str(array[x][y].color) + ' '
-            string += '\n'
+        for y in range(0, self.length):
+            for x in range(0, self.length):
+                string += str(self.array[x][y].color) + ' '
+            if y < self.length - 1:
+                string += '\n'
         return string
 
-length = raw_input('What length do you want for the matrix?: ')
 
-# matrix = [[0 for x in xrange(int(length))] for y in xrange(int(length))]
-matrix = Matrix(5)
+length = raw_input('What length do you want for the matrix?: ')
+matrix = Matrix(int(length))
 print("Color Flow --------")
 print("Size of matrix is " + str(matrix.length))
 
 #Make and print matrix
-#TODO - make random number
-for x in range(0, matrix.length):
-    for y in range(0, matrix.length):
-        rand_color = 7
-        mat = matrix.get(x, y)
-        mat = Cell(rand_color, (x, y))
+# for x in range(0, matrix.length):
+#     for y in range(0, matrix.length):
+#         random_color = 7
+#         mat = matrix.get(x, y)
+#         mat = Cell(random_color, (x, y))
 
 
 #Make and set adjacents
 for x in range(0, matrix.length):
     for y in range(0, matrix.length):
-        fcell = matrix[x][y]
+        fcell = matrix.get(x, y)
         xw = x - 1
         xe = x + 1
         yn = y - 1
@@ -85,22 +97,22 @@ for x in range(0, matrix.length):
         if yn < 0:
             fcell.set_adjacent(Cell(0, (x, yn)), "N")
         else:
-            fcell.set_adjacent(matrix[x][yn], "N")
+            fcell.set_adjacent(matrix.get(x, yn), "N")
 
-        if xe >= len(matrix):
+        if xe >= matrix.length:
             fcell.set_adjacent(Cell(0, (xe, y)), "E")
         else: 
-            fcell.set_adjacent(matrix[xe][y], "E")
+            fcell.set_adjacent(matrix.get(xe, y), "E")
 
-        if ys >= len(matrix):
+        if ys >= matrix.length:
             fcell.set_adjacent(Cell(0, (x, ys)), "S")
         else:
-            fcell.set_adjacent(matrix[x][ys], "S")
+            fcell.set_adjacent(matrix.get(x, ys), "S")
 
         if xw < 0:
             fcell.set_adjacent(Cell(0, (xw, y)), "W")
         else:
-            fcell.set_adjacent(matrix[xw][y], "W")
+            fcell.set_adjacent(matrix.get(xw, y), "W")
 
         #Debug purposes
         # print(fcell)
@@ -109,47 +121,70 @@ for x in range(0, matrix.length):
         # print(" " + str(fcell.adjacents[2]))
         # print(" " + str(fcell.adjacents[3]))
 
-
-
-print("")
-print("Matrix created.........")
-print("")
-
-
 # Depth First Search
 # Non-recursive implementation. unvisited_cells will be the stack that takes in 
 # cells that are adjacent to the current cell. At each iteration of the while 
 # loop, all consecutive cells on top of the stack that are already visited will 
 #be removed. The next cell on top of the stack, hence, is unvisited. It will be
 # set to "visited" and then all of its adjacent cells are added onto the stack. 
-def traversal_algorithm1(cell, color):
-    visited_cell_count = 0
-    total_cell_count = len(matrix) * len(matrix)
-    unvisited_cells = [cell]
 
-    while visited_cell_count != total_cell_count and len(unvisited_cells) > 0:
+def traversal_algorithm1(cell, fill_color):
+    visited_cell_count = 0
+    total_cell_count = matrix.length * matrix.length
+    cells_to_visit = [cell]
+    visited_cells = []
+
+    while len(cells_to_visit) > 0 and visited_cell_count <= total_cell_count:
         
         while True:
-            if unvisited_cells[-1].is_visited():
-                unvisited_cells.pop()
-            else:
+            if not cells_to_visit:
                 break
+            else:
+                if cells_to_visit[-1].is_visited():
+                    cells_to_visit.pop()
+                else:
+                    break
 
-        current_cell = unvisited_cells.pop()
+        if not cells_to_visit:
+            break
+
+        current_cell = cells_to_visit.pop()
         current_cell.visit()
+        visited_cells.append(current_cell)
         visited_cell_count += 1
+        current_color = current_cell.color
+        current_cell.color = fill_color
 
-        # print(current_cell)
         for adj_cell in current_cell.adjacents:
             if not adj_cell.is_out_of_bounds():
-                if adj_cell.color == color:
-                    unvisited_cells.append(adj_cell)
-                    # print("appended")
+                if adj_cell.color == current_color:
+                    cells_to_visit.append(adj_cell)
 
     print(str(visited_cell_count) + " cells have been visited")
+    print("Visited cell stack size: " + str(len(visited_cells)))
+    print('')
+
+    for visited_cell in visited_cells:
+        visited_cell.unvisit()
+    matrix.uniform_color_count = len(visited_cells)
 
 
 
-cell = matrix[0][0]
-slist = [cell]
-traversal_algorithm1(cell)
+##########Main loop#############
+print ''
+score = 0
+while True: 
+    print 'Score: ' + str(score)
+    first_cell = matrix.get(0, 0)
+    print matrix
+    fill_color = raw_input('Enter a color (number) between [1, 7]: ')
+    if fill_color == '0':
+        print('End game...')
+        break
+    traversal_algorithm1(first_cell, int(fill_color))
+    score += 1
+    if matrix.uniform_color_count >= matrix.size - 1:
+        print matrix
+        print 'Player wins!'
+        print ''
+        break
