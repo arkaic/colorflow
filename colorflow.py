@@ -89,19 +89,13 @@ for x in range(0, len(matrix)):
         print(" " + str(fcell.adjacents[2]))
         print(" " + str(fcell.adjacents[3]))
 
+
+
 print("")
 print("Matrix created.........")
 print("")
-print("and lastly")
-cell1 = matrix[1][0]
-print(cell1)
-print(" " + str(cell1.adjacents[0]))
-print(" " + str(cell1.adjacents[1]))
-print(" " + str(cell1.adjacents[2]))
-print(" " + str(cell1.adjacents[3]))
 
-print("")
-print("traversal algorithm begins...")
+
 #Depth First Search
 def traversal_algorithm1(cell):
     visited_cell_count = 0
@@ -115,17 +109,16 @@ def traversal_algorithm1(cell):
         current_cell = open_cells.pop()
         current_cell.visit()
         visited_cell_count += 1
-        c = 0
 
         print(current_cell)
         for adj_cell in current_cell.adjacents:
-            # print(" " + str(adj_cell) + " and color is " + str(adj_cell.color))
             if not adj_cell.is_out_of_bounds():
                 open_cells.append(adj_cell)
-                c += 1
                 print("appended")
 
     print(str(visited_cell_count) + " cells have been visited")
+
+
 
 cell = matrix[0][0]
 slist = [cell]
