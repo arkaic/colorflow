@@ -20,13 +20,13 @@ class Cell:
 
     def set_adjacent(self, cell, direction):
         if direction == 'N':
-            self.adjacents[0] = cell
-        elif direction == 'E':
-            self.adjacents[1] = cell
-        elif direction == 'S':
-            self.adjacents[2] = cell
-        elif direction == 'W':
             self.adjacents[3] = cell
+        elif direction == 'E':
+            self.adjacents[2] = cell
+        elif direction == 'S':
+            self.adjacents[1] = cell
+        elif direction == 'W':
+            self.adjacents[0] = cell
 
     def visit(self):
         self.visited = True
@@ -82,11 +82,12 @@ for x in range(0, len(matrix)):
         else:
             fcell.set_adjacent(matrix[xw][y], "W")
 
-        print(fcell)
-        print(" " + str(fcell.adjacents[0]))
-        print(" " + str(fcell.adjacents[1]))
-        print(" " + str(fcell.adjacents[2]))
-        print(" " + str(fcell.adjacents[3]))
+        #Debug purposes
+        # print(fcell)
+        # print(" " + str(fcell.adjacents[0]))
+        # print(" " + str(fcell.adjacents[1]))
+        # print(" " + str(fcell.adjacents[2]))
+        # print(" " + str(fcell.adjacents[3]))
 
 
 
@@ -95,24 +96,33 @@ print("Matrix created.........")
 print("")
 
 
-#Depth First Search
+# Depth First Search
+# Non-recursive implementation. unvisited_cells will be the stack that takes in cells
+# that are adjacent to the current cell. At each iteration of the while loop, all 
+# consecutive cells on top of the stack that are already visited will be 
+# removed. The next cell on top of the stack, hence, is unvisited. It will be
+# set to "visited" and then all of its adjacent cells are added onto the stack. 
 def traversal_algorithm1(cell):
     visited_cell_count = 0
     total_cell_count = len(matrix) * len(matrix)
-    open_cells = [cell]
+    unvisited_cells = [cell]
 
-    while visited_cell_count != total_cell_count and len(open_cells) > 0:
-        while open_cells[-1].is_visited():
-            open_cells.pop()
+    while visited_cell_count != total_cell_count and len(unvisited_cells) > 0:
+        
+        while True:
+            if unvisited_cells[-1].is_visited():
+                unvisited_cells.pop()
+            else:
+                break
 
-        current_cell = open_cells.pop()
+        current_cell = unvisited_cells.pop()
         current_cell.visit()
         visited_cell_count += 1
 
         print(current_cell)
         for adj_cell in current_cell.adjacents:
             if not adj_cell.is_out_of_bounds():
-                open_cells.append(adj_cell)
+                unvisited_cells.append(adj_cell)
                 print("appended")
 
     print(str(visited_cell_count) + " cells have been visited")
