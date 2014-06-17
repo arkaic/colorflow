@@ -43,31 +43,39 @@ class Matrix:
     length = ""
 
     def __init__(self, n):
-        self.array = [[0 for x in xrange(int(n)) for y in xrange(int(n))]]
+        self.array = [[0 for x in xrange(int(n))] for y in xrange(int(n))]
         self.length = n
 
     def get(self, x, y):
-        return array[x][y]
+        return self.array[x][y]
 
-    # def __str__(self):
+    def __str__(self):
+        string = ""
+        for y in range(0, length):
+            for x in range(0, length):
+                string += str(array[x][y].color) + ' '
+            string += '\n'
+        return string
 
 length = raw_input('What length do you want for the matrix?: ')
 
-matrix = [[0 for x in xrange(int(length))] for y in xrange(int(length))]
+# matrix = [[0 for x in xrange(int(length))] for y in xrange(int(length))]
+matrix = Matrix(5)
 print("Color Flow --------")
-print("Size of matrix is " + str(len(matrix)))
+print("Size of matrix is " + str(matrix.length))
 
 #Make and print matrix
 #TODO - make random number
-for x in range(0, len(matrix)):
-    for y in range(0, len(matrix[x])):
+for x in range(0, matrix.length):
+    for y in range(0, matrix.length):
         rand_color = 7
-        matrix[x][y] = Cell(rand_color, (x,y))
+        mat = matrix.get(x, y)
+        mat = Cell(rand_color, (x, y))
 
 
 #Make and set adjacents
-for x in range(0, len(matrix)):
-    for y in range(0, len(matrix[x])):
+for x in range(0, matrix.length):
+    for y in range(0, matrix.length):
         fcell = matrix[x][y]
         xw = x - 1
         xe = x + 1
@@ -109,10 +117,10 @@ print("")
 
 
 # Depth First Search
-# Non-recursive implementation. unvisited_cells will be the stack that takes in cells
-# that are adjacent to the current cell. At each iteration of the while loop, all 
-# consecutive cells on top of the stack that are already visited will be 
-# removed. The next cell on top of the stack, hence, is unvisited. It will be
+# Non-recursive implementation. unvisited_cells will be the stack that takes in 
+# cells that are adjacent to the current cell. At each iteration of the while 
+# loop, all consecutive cells on top of the stack that are already visited will 
+#be removed. The next cell on top of the stack, hence, is unvisited. It will be
 # set to "visited" and then all of its adjacent cells are added onto the stack. 
 def traversal_algorithm1(cell, color):
     visited_cell_count = 0
@@ -131,12 +139,12 @@ def traversal_algorithm1(cell, color):
         current_cell.visit()
         visited_cell_count += 1
 
-        print(current_cell)
+        # print(current_cell)
         for adj_cell in current_cell.adjacents:
             if not adj_cell.is_out_of_bounds():
-                if adj_cell.color == color
-                unvisited_cells.append(adj_cell)
-                print("appended")
+                if adj_cell.color == color:
+                    unvisited_cells.append(adj_cell)
+                    # print("appended")
 
     print(str(visited_cell_count) + " cells have been visited")
 
@@ -145,10 +153,3 @@ def traversal_algorithm1(cell, color):
 cell = matrix[0][0]
 slist = [cell]
 traversal_algorithm1(cell)
-
-
-
-#Notes
-# 123456789
-# __________
-# 7|8|9|1|2|3|4
