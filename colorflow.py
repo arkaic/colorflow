@@ -1,4 +1,5 @@
 import random
+import os
 
 #Cell holding the coordinate and color
 #Null cell will have color = 0
@@ -54,6 +55,7 @@ class Matrix:
         self.length = n
         self.size = n * n
         random.seed()
+        #Create and fill matrix
         for x in range(0, self.length):
             for y in range(0, self.length):
                 random_color = random.randint(1, 7)
@@ -71,63 +73,12 @@ class Matrix:
                 string += '\n'
         return string
 
-
-length = raw_input('What length do you want for the matrix?: ')
-matrix = Matrix(int(length))
-print("Color Flow --------")
-print("Size of matrix is " + str(matrix.length))
-
-#Make and print matrix
-# for x in range(0, matrix.length):
-#     for y in range(0, matrix.length):
-#         random_color = 7
-#         mat = matrix.get(x, y)
-#         mat = Cell(random_color, (x, y))
-
-
-#Make and set adjacents
-for x in range(0, matrix.length):
-    for y in range(0, matrix.length):
-        fcell = matrix.get(x, y)
-        xw = x - 1
-        xe = x + 1
-        yn = y - 1
-        ys = y + 1
-
-        if yn < 0:
-            fcell.set_adjacent(Cell(0, (x, yn)), "N")
-        else:
-            fcell.set_adjacent(matrix.get(x, yn), "N")
-
-        if xe >= matrix.length:
-            fcell.set_adjacent(Cell(0, (xe, y)), "E")
-        else: 
-            fcell.set_adjacent(matrix.get(xe, y), "E")
-
-        if ys >= matrix.length:
-            fcell.set_adjacent(Cell(0, (x, ys)), "S")
-        else:
-            fcell.set_adjacent(matrix.get(x, ys), "S")
-
-        if xw < 0:
-            fcell.set_adjacent(Cell(0, (xw, y)), "W")
-        else:
-            fcell.set_adjacent(matrix.get(xw, y), "W")
-
-        #Debug purposes
-        # print(fcell)
-        # print(" " + str(fcell.adjacents[0]))
-        # print(" " + str(fcell.adjacents[1]))
-        # print(" " + str(fcell.adjacents[2]))
-        # print(" " + str(fcell.adjacents[3]))
-
-# Depth First Search
+##Depth First Search
 # Non-recursive implementation. unvisited_cells will be the stack that takes in 
 # cells that are adjacent to the current cell. At each iteration of the while 
 # loop, all consecutive cells on top of the stack that are already visited will 
-#be removed. The next cell on top of the stack, hence, is unvisited. It will be
+# be removed. The next cell on top of the stack, hence, is unvisited. It will be
 # set to "visited" and then all of its adjacent cells are added onto the stack. 
-
 def traversal_algorithm1(cell, fill_color):
     visited_cell_count = 0
     total_cell_count = matrix.length * matrix.length
@@ -160,8 +111,8 @@ def traversal_algorithm1(cell, fill_color):
                 if adj_cell.color == current_color:
                     cells_to_visit.append(adj_cell)
 
-    print(str(visited_cell_count) + " cells have been visited")
-    print("Visited cell stack size: " + str(len(visited_cells)))
+    # print(str(visited_cell_count) + " cells have been visited")
+    # print("Visited cell stack size: " + str(len(visited_cells)))
     print('')
 
     for visited_cell in visited_cells:
@@ -170,10 +121,49 @@ def traversal_algorithm1(cell, fill_color):
 
 
 
+
+######Main Script##############
+######           ##############
+length = raw_input('What length do you want for the matrix?: ')
+matrix = Matrix(int(length))
+print("Color Flow --------")
+print("Size of matrix is " + str(matrix.length))
+
+#Make and set adjacents
+for x in range(0, matrix.length):
+    for y in range(0, matrix.length):
+        fcell = matrix.get(x, y)
+        xw = x - 1
+        xe = x + 1
+        yn = y - 1
+        ys = y + 1
+
+        if yn < 0:
+            fcell.set_adjacent(Cell(0, (x, yn)), "N")
+        else:
+            fcell.set_adjacent(matrix.get(x, yn), "N")
+
+        if xe >= matrix.length:
+            fcell.set_adjacent(Cell(0, (xe, y)), "E")
+        else: 
+            fcell.set_adjacent(matrix.get(xe, y), "E")
+
+        if ys >= matrix.length:
+            fcell.set_adjacent(Cell(0, (x, ys)), "S")
+        else:
+            fcell.set_adjacent(matrix.get(x, ys), "S")
+
+        if xw < 0:
+            fcell.set_adjacent(Cell(0, (xw, y)), "W")
+        else:
+            fcell.set_adjacent(matrix.get(xw, y), "W")
+
+
 ##########Main loop#############
 print ''
 score = 0
 while True: 
+    os.system('clear')
     print 'Score: ' + str(score)
     first_cell = matrix.get(0, 0)
     print matrix
@@ -184,6 +174,8 @@ while True:
     traversal_algorithm1(first_cell, int(fill_color))
     score += 1
     if matrix.uniform_color_count >= matrix.size - 1:
+        os.system('clear')
+        print 'Final score: ' + str(score)
         print matrix
         print 'Player wins!'
         print ''
