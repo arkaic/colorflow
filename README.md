@@ -1,3 +1,5 @@
+EDIT: Final score sometimes not right; still needs fixing.
+
 Prototyping an idea for a game.
 
 -There is an nxn 2D array with a random color (number) in each cell. 

@@ -1,5 +1,6 @@
 import random
 import os
+import sys
 
 #Cell holding the coordinate and color
 #Null cell will have color = 0
@@ -73,6 +74,36 @@ class Matrix:
                 string += '\n'
         return string
 
+#Make and set adjacents
+def set_adjacent_cells(matrix):
+    for x in range(0, matrix.length):
+        for y in range(0, matrix.length):
+            cell = matrix.get(x, y)
+            xw = x - 1
+            xe = x + 1
+            yn = y - 1
+            ys = y + 1
+
+            if yn < 0:
+                cell.set_adjacent(Cell(0, (x, yn)), "N")
+            else:
+                cell.set_adjacent(matrix.get(x, yn), "N")
+
+            if xe >= matrix.length:
+                cell.set_adjacent(Cell(0, (xe, y)), "E")
+            else: 
+                cell.set_adjacent(matrix.get(xe, y), "E")
+
+            if ys >= matrix.length:
+                cell.set_adjacent(Cell(0, (x, ys)), "S")
+            else:
+                cell.set_adjacent(matrix.get(x, ys), "S")
+
+            if xw < 0:
+                cell.set_adjacent(Cell(0, (xw, y)), "W")
+            else:
+                cell.set_adjacent(matrix.get(xw, y), "W")
+
 ##Depth First Search
 # Non-recursive implementation. unvisited_cells will be the stack that takes in 
 # cells that are adjacent to the current cell. At each iteration of the while 
@@ -122,61 +153,56 @@ def traversal_algorithm1(cell, fill_color):
 
 
 
-######Main Script##############
-######           ##############
-length = raw_input('What length do you want for the matrix?: ')
+
+################################Main Script####################################
+################################           ####################################
+os.system('clear')
+print('********COLOR COLLAPSE!!!**********')
+print ''
+print ''
+while True:
+    length = raw_input('What length do you want for the matrix?: ')
+    if length == 'q':
+        sys.exit('End game')
+    elif int(length) > 1:
+        break
+    elif int(length) <= 1:
+        print 'Length is too small'
+
 matrix = Matrix(int(length))
-print("Color Flow --------")
-print("Size of matrix is " + str(matrix.length))
+os.system('clear')
+set_adjacent_cells(matrix)
 
-#Make and set adjacents
-for x in range(0, matrix.length):
-    for y in range(0, matrix.length):
-        fcell = matrix.get(x, y)
-        xw = x - 1
-        xe = x + 1
-        yn = y - 1
-        ys = y + 1
-
-        if yn < 0:
-            fcell.set_adjacent(Cell(0, (x, yn)), "N")
-        else:
-            fcell.set_adjacent(matrix.get(x, yn), "N")
-
-        if xe >= matrix.length:
-            fcell.set_adjacent(Cell(0, (xe, y)), "E")
-        else: 
-            fcell.set_adjacent(matrix.get(xe, y), "E")
-
-        if ys >= matrix.length:
-            fcell.set_adjacent(Cell(0, (x, ys)), "S")
-        else:
-            fcell.set_adjacent(matrix.get(x, ys), "S")
-
-        if xw < 0:
-            fcell.set_adjacent(Cell(0, (xw, y)), "W")
-        else:
-            fcell.set_adjacent(matrix.get(xw, y), "W")
-
-
-##########Main loop#############
+####Main Loop####
 print ''
 score = 0
 while True: 
-    os.system('clear')
+    print 'Size of matrix is ' + str(matrix.length)
+    print ''
     print 'Score: ' + str(score)
-    first_cell = matrix.get(0, 0)
     print matrix
-    fill_color = raw_input('Enter a color (number) between [1, 7]: ')
-    if fill_color == '0':
+
+    fill_color = int(raw_input('Enter a color (number) between [1, 7]: '))
+    first_cell = matrix.get(0, 0)
+    os.system('clear')
+
+    if fill_color == 0:
         print('End game...')
         break
-    traversal_algorithm1(first_cell, int(fill_color))
-    score += 1
-    if matrix.uniform_color_count >= matrix.size - 1:
+    elif fill_color < 0 or fill_color > 7:
+        fill_color = 0
         os.system('clear')
-        print 'Final score: ' + str(score)
-        print matrix
-        print 'Player wins!'
+        print 'Try again..'
         print ''
-        break
+        continue
+    else:
+        traversal_algorithm1(first_cell, fill_color)
+        score += 1
+        os.system('clear')
+        if matrix.uniform_color_count >= matrix.size - 1:
+            os.system('clear')
+            print 'Final score: ' + str(score)
+            print matrix
+            print 'Player wins!'
+            print ''
+            break
