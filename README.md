@@ -1,4 +1,5 @@
-EDIT: Final score sometimes not right; still needs fixing.
+EDIT:   Final score sometimes not right; still needs fixing.
+EDIT 2: Final score fixed, plus a few polishes.
 
 Prototyping an idea for a game.
 

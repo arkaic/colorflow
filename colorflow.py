@@ -49,7 +49,7 @@ class Matrix:
     array = ""
     length = ""
     size = ""
-    uniform_color_count = 1
+    uniform_color_count = 0
 
     def __init__(self, n):
         self.array = [[0 for x in xrange(int(n))] for y in xrange(int(n))]
@@ -114,7 +114,7 @@ def traversal_algorithm1(cell, fill_color):
     visited_cell_count = 0
     total_cell_count = matrix.length * matrix.length
     cells_to_visit = [cell]
-    visited_cells = []
+    visited_cells = [] #To unvisit after the loop
 
     while len(cells_to_visit) > 0 and visited_cell_count <= total_cell_count:
         
@@ -132,24 +132,21 @@ def traversal_algorithm1(cell, fill_color):
 
         current_cell = cells_to_visit.pop()
         current_cell.visit()
-        visited_cells.append(current_cell)
         visited_cell_count += 1
-        current_color = current_cell.color
+        prev_color = current_cell.color
         current_cell.color = fill_color
+        visited_cells.append(current_cell)
 
         for adj_cell in current_cell.adjacents:
             if not adj_cell.is_out_of_bounds():
-                if adj_cell.color == current_color:
+                if adj_cell.color == prev_color or adj_cell.color == fill_color:
                     cells_to_visit.append(adj_cell)
 
-    # print(str(visited_cell_count) + " cells have been visited")
-    # print("Visited cell stack size: " + str(len(visited_cells)))
     print('')
 
+    matrix.uniform_color_count = len(visited_cells)
     for visited_cell in visited_cells:
         visited_cell.unvisit()
-    matrix.uniform_color_count = len(visited_cells)
-
 
 
 
@@ -171,10 +168,12 @@ while True:
 
 matrix = Matrix(int(length))
 os.system('clear')
+
 set_adjacent_cells(matrix)
+print ''
+
 
 ####Main Loop####
-print ''
 score = 0
 while True: 
     print 'Size of matrix is ' + str(matrix.length)
@@ -182,24 +181,23 @@ while True:
     print 'Score: ' + str(score)
     print matrix
 
-    fill_color = int(raw_input('Enter a color (number) between [1, 7]: '))
+    fill_color = raw_input('Enter a color (number) between [1, 7]: ')
     first_cell = matrix.get(0, 0)
     os.system('clear')
 
-    if fill_color == 0:
-        print('End game...')
-        break
-    elif fill_color < 0 or fill_color > 7:
-        fill_color = 0
+    if fill_color == '' or int(fill_color) < 0 or int(fill_color) > 7:
         os.system('clear')
         print 'Try again..'
         print ''
         continue
+    elif int(fill_color) == 0:
+        print('End game...')
+        break
     else:
-        traversal_algorithm1(first_cell, fill_color)
+        traversal_algorithm1(first_cell, int(fill_color))
         score += 1
-        os.system('clear')
-        if matrix.uniform_color_count >= matrix.size - 1:
+        # os.system('clear')
+        if matrix.uniform_color_count >= matrix.size:
             os.system('clear')
             print 'Final score: ' + str(score)
             print matrix
