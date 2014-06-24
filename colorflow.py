@@ -203,4 +203,8 @@ while True:
             print matrix
             print 'Player wins!'
             print ''
-            break
+            confirmation = raw_input('Play again? (y/n): ')
+            if confirmation == 'y' or confirmaton == 'Y':
+                continue
+            elif confirmation == 'n' or confirmation == 'N':
+                break
