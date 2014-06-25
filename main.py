@@ -9,7 +9,7 @@ pygame.display.set_caption('Color Flow')
 
 # Set up colors
 BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+WHITE = (255, 255, 255) 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
@@ -17,13 +17,15 @@ PURPLE = (128, 0, 128)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 BROWN = (165, 42, 42)
-
+colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
+        #  0     1      2     3       4       5       6
 DISPLAYSURFACE.fill(WHITE)
 redrect = pygame.Rect(10, 20, 20, 20)
-greenrect = pygame.Rect(30, 21, 20, 20)
+greenrect = pygame.Rect(30, 20, 20, 20)
+bluerect = pygame.Rect(10, 40, 20, 20)
 pygame.draw.rect(DISPLAYSURFACE, RED, redrect)
 pygame.draw.rect(DISPLAYSURFACE, GREEN, greenrect)
-
+pygame.draw.rect(DISPLAYSURFACE, BLUE, bluerect)
 
 
 
@@ -88,8 +90,10 @@ class Matrix:
         random.seed()
         for x in range(0, n):
             for y in range(0, n):
-                random_color = random.randint(1, 7)
+                random_color = random.randint(0, 6)
                 self.array[x][y] = Cell(random_color, (x, y))
+                rect = pygame.Rect(x * 20 + 10, y * 20 + 20, 20, 20)
+                pygame.draw.rect(DISPLAYSURFACE, colors[random_color], rect)
 
     def get(self, x, y):
         return self.array[x][y]
