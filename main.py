@@ -23,9 +23,9 @@ DISPLAYSURFACE.fill(WHITE)
 redrect = pygame.Rect(10, 20, 20, 20)
 greenrect = pygame.Rect(30, 20, 20, 20)
 bluerect = pygame.Rect(10, 40, 20, 20)
-pygame.draw.rect(DISPLAYSURFACE, RED, redrect)
-pygame.draw.rect(DISPLAYSURFACE, GREEN, greenrect)
-pygame.draw.rect(DISPLAYSURFACE, BLUE, bluerect)
+# pygame.draw.rect(DISPLAYSURFACE, RED, redrect)
+# pygame.draw.rect(DISPLAYSURFACE, GREEN, greenrect)
+# pygame.draw.rect(DISPLAYSURFACE, BLUE, bluerect)
 
 
 
@@ -38,11 +38,13 @@ class Cell:
     y = ""
     visited = ""
     adjacents = ""
+    square = ""
 
-    def __init__(self, color, (numx, numy)):
+    def __init__(self, color, (numx, numy), square):
         self.color = color
         self.x = numx
         self.y = numy
+        self.square = square
         self.visited = False
         #Adjacent order   N   E   S   W
         self.adjacents = ["", "", "", ""]
@@ -86,14 +88,17 @@ class Matrix:
         # Create and fill matrix
         self._make_array(n)
 
+    # Make squares and random colors for each. Put square in newly created Cell
+    # Put new Cell into 2d array. Display the square with a randomly chosen 
+    # color.
     def _make_array(self, n):
         random.seed()
         for x in range(0, n):
             for y in range(0, n):
                 random_color = random.randint(0, 6)
-                self.array[x][y] = Cell(random_color, (x, y))
-                rect = pygame.Rect(x * 20 + 10, y * 20 + 20, 20, 20)
-                pygame.draw.rect(DISPLAYSURFACE, colors[random_color], rect)
+                square = pygame.Rect(x * 20 + 10, y * 20 + 20, 20, 20)
+                self.array[x][y] = Cell(random_color, (x, y), square)
+                pygame.draw.rect(DISPLAYSURFACE, colors[random_color], square)
 
     def get(self, x, y):
         return self.array[x][y]
@@ -110,10 +115,92 @@ class Matrix:
                 string += '\n'
         return string
 
+#Make and set adjacents
+def set_adjacent_cells(matrix):
+    for x in range(0, matrix.length):
+        for y in range(0, matrix.length):
+            cell = matrix.get(x, y)
+            xw = x - 1
+            xe = x + 1
+            yn = y - 1
+            ys = y + 1
+
+            if yn < 0:
+                cell.set_adjacent(Cell(9, (x, yn), ""), "N")
+            else:
+                cell.set_adjacent(matrix.get(x, yn), "N")
+
+            if xe >= matrix.length:
+                cell.set_adjacent(Cell(9, (xe, y), ""), "E")
+            else: 
+                cell.set_adjacent(matrix.get(xe, y), "E")
+
+            if ys >= matrix.length:
+                cell.set_adjacent(Cell(9, (x, ys), ""), "S")
+            else:
+                cell.set_adjacent(matrix.get(x, ys), "S")
+
+            if xw < 0:
+                cell.set_adjacent(Cell(9, (xw, y), ""), "W")
+            else:
+                cell.set_adjacent(matrix.get(xw, y), "W")
+
+##Depth First Search
+# Non-recursive implementation. unvisited_cells will be the stack that takes in 
+# cells that are adjacent to the current cell. At each iteration of the while 
+# loop, all consecutive cells on top of the stack that are already visited will 
+# be removed. The next cell on top of the stack, hence, is unvisited. It will be
+# set to "visited" and then all of its adjacent cells are added onto the stack. 
+def traversal_algorithm1(cell, fill_color):
+    visited_cell_count = 0
+    total_cell_count = matrix.length * matrix.length
+    cells_to_visit = [cell]
+    visited_cells = [] #To unvisit after the loop
+
+    while len(cells_to_visit) > 0 and visited_cell_count <= total_cell_count:
+        
+        while True:
+            if not cells_to_visit:
+                break
+            else:
+                if cells_to_visit[-1].is_visited():
+                    cells_to_visit.pop()
+                else:
+                    break
+
+        if not cells_to_visit:
+            break
+
+        current_cell = cells_to_visit.pop()
+        current_cell.visit()
+        visited_cell_count += 1
+        prev_color = current_cell.color
+        current_cell.color = fill_color
+        pygame.draw.rect(DISPLAYSURFACE, colors[fill_color], 
+            current_cell.square)
+        visited_cells.append(current_cell)
+
+        for adj_cell in current_cell.adjacents:
+            if not adj_cell.is_out_of_bounds():
+                if adj_cell.color == prev_color or adj_cell.color == fill_color:
+                    cells_to_visit.append(adj_cell)
+
+    print('')
+
+    matrix.uniform_color_count = len(visited_cells)
+    for visited_cell in visited_cells:
+        visited_cell.unvisit()
+
+
+
 ###### Main game loop
-a = Matrix(4)
-print a.test()
+matrix = Matrix(10)
+set_adjacent_cells(matrix)
+pygame.display.update()
 while True: 
+    color_number = raw_input('Enter something?')
+    traversal_algorithm1(matrix.get(0, 0), int(color_number))
+    print matrix
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
