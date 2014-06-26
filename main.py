@@ -187,12 +187,10 @@ DISPLAYSURFACE.fill(WHITE)
 matrix = Matrix(10)
 score = 0
 set_adjacent_cells(matrix)
-print 'Cell 0,0 has ' + str(len(matrix.get(0,0).adjacents)) + 'adjs'
 pygame.display.update()
 while True: 
     color_number = raw_input('Enter something?')
     traversal_algorithm1(matrix.get(0, 0), int(color_number))
-    # print matrix
     score += 1
     for event in pygame.event.get():
         if event.type == QUIT:
