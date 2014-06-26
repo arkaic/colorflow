@@ -1,35 +1,6 @@
 import pygame, sys, random
 from pygame.locals import *
 
-pygame.init()
- 
-# Set up window
-DISPLAYSURFACE = pygame.display.set_mode((500, 400), 0, 32)
-pygame.display.set_caption('Color Flow')
-
-# Set up colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255) 
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-PURPLE = (128, 0, 128)
-YELLOW = (255, 255, 0)
-ORANGE = (255, 165, 0)
-BROWN = (165, 42, 42)
-colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
-        #  0     1      2     3       4       5       6
-DISPLAYSURFACE.fill(WHITE)
-redrect = pygame.Rect(10, 20, 20, 20)
-greenrect = pygame.Rect(30, 20, 20, 20)
-bluerect = pygame.Rect(10, 40, 20, 20)
-# pygame.draw.rect(DISPLAYSURFACE, RED, redrect)
-# pygame.draw.rect(DISPLAYSURFACE, GREEN, greenrect)
-# pygame.draw.rect(DISPLAYSURFACE, BLUE, bluerect)
-
-
-
-
 
 
 class Cell: 
@@ -73,7 +44,7 @@ class Cell:
 
     #If this cell is out of bounds, its color shall be 0.
     def is_out_of_bounds(self):
-        return self.color == 0
+        return self.color == 9
 
 class Matrix:
     array = ""
@@ -102,9 +73,6 @@ class Matrix:
 
     def get(self, x, y):
         return self.array[x][y]
-
-    def test(self):
-        return RED
 
     def __str__(self):
         string = ""
@@ -157,8 +125,7 @@ def traversal_algorithm1(cell, fill_color):
     cells_to_visit = [cell]
     visited_cells = [] #To unvisit after the loop
 
-    while len(cells_to_visit) > 0 and visited_cell_count <= total_cell_count:
-        
+    while len(cells_to_visit) > 0 and visited_cell_count <= total_cell_count:    
         while True:
             if not cells_to_visit:
                 break
@@ -167,7 +134,6 @@ def traversal_algorithm1(cell, fill_color):
                     cells_to_visit.pop()
                 else:
                     break
-
         if not cells_to_visit:
             break
 
@@ -180,10 +146,13 @@ def traversal_algorithm1(cell, fill_color):
             current_cell.square)
         visited_cells.append(current_cell)
 
+        # counter = 0
         for adj_cell in current_cell.adjacents:
             if not adj_cell.is_out_of_bounds():
                 if adj_cell.color == prev_color or adj_cell.color == fill_color:
                     cells_to_visit.append(adj_cell)
+                    # counter += 1
+        # print 'Counter size: ' + str(counter)
 
     print('')
 
@@ -193,14 +162,38 @@ def traversal_algorithm1(cell, fill_color):
 
 
 
+###############Main Script ####################
+pygame.init()
+ 
+# Set up window
+DISPLAYSURFACE = pygame.display.set_mode((500, 400), 0, 32)
+pygame.display.set_caption('Color Flow')
+
+# Set up colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255) 
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+PURPLE = (128, 0, 128)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 165, 0)
+BROWN = (165, 42, 42)
+colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
+        #  0     1      2     3       4       5       6
+DISPLAYSURFACE.fill(WHITE)
+
 ###### Main game loop
 matrix = Matrix(10)
+score = 0
 set_adjacent_cells(matrix)
+print 'Cell 0,0 has ' + str(len(matrix.get(0,0).adjacents)) + 'adjs'
 pygame.display.update()
 while True: 
     color_number = raw_input('Enter something?')
     traversal_algorithm1(matrix.get(0, 0), int(color_number))
-    print matrix
+    # print matrix
+    score += 1
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
