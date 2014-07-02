@@ -67,7 +67,7 @@ class Matrix:
         for x in range(0, n):
             for y in range(0, n):
                 random_color = random.randint(0, 6)
-                square = pygame.Rect(x * 20 + 40, y * 20 + 70, 20, 20)
+                square = pygame.Rect(x * 20 + 10, y * 20 + 20, 20, 20)
                 self.array[x][y] = Cell(random_color, (x, y), square)
                 pygame.draw.rect(DISPLAYSURFACE, colors[random_color], square)
 
@@ -151,6 +151,10 @@ def traversal_algorithm1(cell, fill_color):
             if not adj_cell.is_out_of_bounds():
                 if adj_cell.color == prev_color or adj_cell.color == fill_color:
                     cells_to_visit.append(adj_cell)
+                    # counter += 1
+        # print 'Counter size: ' + str(counter)
+
+    print('')
 
     matrix.uniform_color_count = len(visited_cells)
     for visited_cell in visited_cells:
@@ -177,50 +181,35 @@ ORANGE = (255, 165, 0)
 BROWN = (165, 42, 42)
 colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
         #  0     1      2     3       4       5       6
-DISPLAYSURFACE.fill(WHITE)
-
-font = pygame.font.Font('freesansbold.ttf', 32)
-title = font.render('Color Flows', True, GREEN, BLUE)
-text_rect_obj = title.get_rect()
-text_rect_obj.center = (400, 150)
+# DISPLAYSURFACE.fill(WHITE)
 
 ###### Main game loop
 matrix = Matrix(10)
-palette_list = []
-for x in range(0, len(colors)):
-    square = pygame.Rect(x * 50 + 10, 10, 40, 40)
-    pygame.draw.rect(DISPLAYSURFACE, colors[x], square)
-    palette_list.append(square) 
-
 score = 0
 set_adjacent_cells(matrix)
 pygame.display.update()
-prev_color_number = 99
-while True:
-    color_number = 99
-    
-    DISPLAYSURFACE.blit(title, text_rect_obj)
-    
+while True: 
+    print score
+    color_abbrev = raw_input('Enter first letter of color')
+    if color_abbrev == 'r':
+        color_number = 0
+    elif color_abbrev == 'g':
+        color_number = 1
+    elif color_abbrev == 'b':
+        color_number = 2
+    elif color_abbrev == 'p':
+        color_number = 3
+    elif color_abbrev == 'y':
+        color_number = 4
+    elif color_abbrev == 'o':
+        color_number = 5
+    elif color_abbrev == 'w':
+        color_number = 6
+    traversal_algorithm1(matrix.get(0, 0), int(color_number))
+    score += 1
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == MOUSEBUTTONUP:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            counter = 0
-            for square in palette_list:
-                if square.collidepoint(mouse_x, mouse_y):
-                    color_number = counter
-                    break
-                counter += 1
-    if color_number != 99:
-        traversal_algorithm1(matrix.get(0, 0), int(color_number))
-        if color_number != prev_color_number:
-            score += 1
-            prev_color_number = color_number
-    score_str = 'Score: ' + str(score)
-    score_text = font.render(score_str, True, RED, BLACK)
-    score_text.get_rect().center = (400, 190)
-    DISPLAYSURFACE.blit(score_text, (300, 190))
     pygame.display.update()
 
