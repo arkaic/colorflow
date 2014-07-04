@@ -2,15 +2,8 @@ import pygame, sys, random
 from pygame.locals import *
 
 
-
+#################CLASSES################
 class Cell: 
-    color = ""
-    x = ""
-    y = ""
-    visited = ""
-    adjacents = ""
-    square = ""
-
     def __init__(self, color, (numx, numy), square):
         self.color = color
         self.x = numx
@@ -47,9 +40,6 @@ class Cell:
         return self.color == 9
 
 class Matrix:
-    array = ""
-    length = ""
-    size = ""
     uniform_color_count = 0
 
     def __init__(self, n):
@@ -83,6 +73,24 @@ class Matrix:
                 string += '\n'
         return string
 
+# Abstract class
+class Screen:
+    def update(self):
+        raise NotImplementedError('Subclass must implemment abstract method')
+
+# Concrete classes
+# Idea: Move all screen rendering to these classes' update functions. 
+class MenuScreen(Screen):
+    def update(self):
+        print 'I am Menu'
+        return
+
+class PlayScreen(Screen):
+    def update(self):
+        print str(matrix.length)
+        return
+
+###########FUNCTIONS#######################
 #Make and set adjacents
 def set_adjacent_cells(matrix):
     for x in range(0, matrix.length):
@@ -160,12 +168,12 @@ def traversal_algorithm1(cell, fill_color):
 
 ###############Main Script ####################
 pygame.init()
- 
+
 # Set up window
 DISPLAYSURFACE = pygame.display.set_mode((500, 400), 0, 32)
 pygame.display.set_caption('Color Flow')
 
-# Set up colors
+# Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255) 
 RED = (255, 0, 0)
@@ -174,7 +182,7 @@ BLUE = (0, 0, 255)
 PURPLE = (128, 0, 128)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
-BROWN = (165, 42, 42)
+BROWN = (120, 42, 42)
 colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
         #  0     1      2     3       4       5       6
 DISPLAYSURFACE.fill(WHITE)
@@ -184,9 +192,10 @@ title = font.render('Color Flows', True, GREEN, BLUE)
 text_rect_obj = title.get_rect()
 text_rect_obj.center = (400, 150)
 
-###### Main game loop
-matrix = Matrix(10)
+matrix = Matrix(12)
 palette_list = []
+
+# Render palette of colors
 for x in range(0, len(colors)):
     square = pygame.Rect(x * 50 + 10, 10, 40, 40)
     pygame.draw.rect(DISPLAYSURFACE, colors[x], square)
@@ -196,6 +205,12 @@ score = 0
 set_adjacent_cells(matrix)
 pygame.display.update()
 prev_color_number = 99
+
+print ##########TEST AREA############
+
+print ##########END TEST AREA###########
+
+###### Main game loop
 while True:
     color_number = 99
     
@@ -211,8 +226,11 @@ while True:
             for square in palette_list:
                 if square.collidepoint(mouse_x, mouse_y):
                     color_number = counter
+                    # counter represents index in palette_list
                     break
                 counter += 1
+
+    # If chosen color is not the same as before, 
     if color_number != 99:
         traversal_algorithm1(matrix.get(0, 0), int(color_number))
         if color_number != prev_color_number:
@@ -223,4 +241,3 @@ while True:
     score_text.get_rect().center = (400, 190)
     DISPLAYSURFACE.blit(score_text, (300, 190))
     pygame.display.update()
-
