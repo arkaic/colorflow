@@ -78,12 +78,11 @@ class Screen:
         raise NotImplementedError('Subclass must implemment abstract method')
 
 # Concrete classes
-# Idea: Move all screen rendering to these classes' update functions. 
 class MenuScreen(Screen):
     def __init__(self):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
-        self.title = font.render('Color Flows', True, GREEN, BLUE)
-        self.text_rect_obj = title.get_rect()
+        self.title = self.font.render('Color Flows', True, GREEN, BLUE)
+        self.text_rect_obj = self.title.get_rect()
         self.text_rect_obj.center = (400, 150)
 
     def update(self):
@@ -92,10 +91,15 @@ class MenuScreen(Screen):
 class PlayScreen(Screen):
     def __init__(self):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
-        self.score_str = 'Score: ' + str(score)
-        self.score_text = font.render(score_str, True, RED, BLACK)
-        self.score_text.get_rect().center = (400, 190)
         
+        exit_to_menu_string = 'Back to menu'
+        self.exit_to_menu_surf = self.font.render(exit_to_menu_string, True, RED,
+                                                  BLACK)
+        self.exit_rect = self.exit_to_menu_surf.get_rect()
+        self.exit_rect.center = (200, 350)
+        # Todo random square to get to menu screen
+        self.objects = [pygame.Rect(30, 370, 20, 20)]
+
     def update(self):
         # Render palette of colors
         for x in range(0, len(colors)):
@@ -106,9 +110,16 @@ class PlayScreen(Screen):
         for x in range(0, matrix.length):
             for y in range(0, matrix.length):
                 pygame.draw.rect(DISPLAYSURFACE, colors[matrix.get(x, y).color],
-                                 matrix.square)
+                                 matrix.get(x, y).square)
         # Render high score
-        DISPLAYSURFACE.blit(self.score_str, self.score_text.get_rect())
+        score_str = 'Score: ' + str(score)
+        score_text = self.font.render(score_str, True, RED, BLACK)
+        score_text_obj = score_text.get_rect()
+        score_text_obj.center = (400, 150)
+        DISPLAYSURFACE.blit(score_text, score_text_obj)
+        # Render menu button (temporary)
+        DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect.center)
+
 
 ###########FUNCTIONS#######################
 #Make and set adjacents
@@ -171,7 +182,7 @@ def traversal_algorithm1(cell, fill_color):
         prev_color = current_cell.color
         current_cell.color = fill_color
         pygame.draw.rect(DISPLAYSURFACE, colors[fill_color], 
-            current_cell.square)
+                         current_cell.square)
         visited_cells.append(current_cell)
 
         # counter = 0
@@ -204,21 +215,21 @@ YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 BROWN = (120, 42, 70)
 colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
-        #  0     1      2     3       4       5       6
+#  0     1      2     3       4       5       6
 DISPLAYSURFACE.fill(WHITE)
-
-
 
 matrix = Matrix(12)
 palette_list = []
-
-
 
 score = 0
 set_adjacent_cells(matrix)
 pygame.display.update()
 prev_color_number = matrix.get(0, 0).color
 color_number = prev_color_number
+
+menu_screen = MenuScreen()
+play_screen = PlayScreen()
+current_screen = play_screen
 print ##########TEST AREA############
 
 print ##########END TEST AREA###########
@@ -233,17 +244,31 @@ while True:
         elif event.type == MOUSEBUTTONUP:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             counter = 0
+            # Establish changing color by using mouse clicked coordinates. 
+            # Counter is the index used to locate color in color list.
             for square in palette_list:
                 if square.collidepoint(mouse_x, mouse_y):
-                    # counter represents index in palette_list
                     color_number = counter
                     break
-                counter += 1
+                else:
+                    counter += 1
             # If chosen color is not the same as before,        
             if color_number != prev_color_number:
                 traversal_algorithm1(matrix.get(0, 0), int(color_number))
                 score += 1
                 prev_color_number = color_number
+            
+            # Todo: encapsulate into Screen object or another object
+            rectangle = current_screen.exit_to_menu_surf.get_rect()
+            print rectangle.x
+            print rectangle.y
+            print rectangle.bottom
+            print rectangle.right
+            print rectangle.width
+            print rectangle.height
+            if rectangle.collidepoint(mouse_x, mouse_y):
+                DISPLAYSURFACE.fill(BLACK)
+                current_screen = menu_screen
 
-    
+    current_screen.update()    
     pygame.display.update()
