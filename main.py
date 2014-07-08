@@ -59,7 +59,6 @@ class Matrix:
                 random_color = random.randint(0, 6)
                 square = pygame.Rect(x * 20 + 40, y * 20 + 70, 20, 20)
                 self.array[x][y] = Cell(random_color, (x, y), square)
-                pygame.draw.rect(DISPLAYSURFACE, colors[random_color], square)
 
     def get(self, x, y):
         return self.array[x][y]
@@ -79,15 +78,37 @@ class Screen:
         raise NotImplementedError('Subclass must implemment abstract method')
 
 # Concrete classes
+# Idea: Move all screen rendering to these classes' update functions. 
 class MenuScreen(Screen):
+    def __init__(self):
+        self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.title = font.render('Color Flows', True, GREEN, BLUE)
+        self.text_rect_obj = title.get_rect()
+        self.text_rect_obj.center = (400, 150)
+
     def update(self):
-        print 'I am Menu'
-        return
+        DISPLAYSURFACE.blit(self.title, self.text_rect_obj)
 
 class PlayScreen(Screen):
+    def __init__(self):
+        self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.score_str = 'Score: ' + str(score)
+        self.score_text = font.render(score_str, True, RED, BLACK)
+        self.score_text.get_rect().center = (400, 190)
+        
     def update(self):
-        print str(matrix.length)
-        return
+        # Render palette of colors
+        for x in range(0, len(colors)):
+            square = pygame.Rect(x * 50 + 10, 10, 40, 40)
+            pygame.draw.rect(DISPLAYSURFACE, colors[x], square)
+            palette_list.append(square) 
+        # Render color grid
+        for x in range(0, matrix.length):
+            for y in range(0, matrix.length):
+                pygame.draw.rect(DISPLAYSURFACE, colors[matrix.get(x, y).color],
+                                 matrix.square)
+        # Render high score
+        DISPLAYSURFACE.blit(self.score_str, self.score_text.get_rect())
 
 ###########FUNCTIONS#######################
 #Make and set adjacents
@@ -181,39 +202,29 @@ BLUE = (0, 0, 255)
 PURPLE = (128, 0, 128)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
-BROWN = (120, 42, 42)
+BROWN = (120, 42, 70)
 colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
         #  0     1      2     3       4       5       6
 DISPLAYSURFACE.fill(WHITE)
 
-font = pygame.font.Font('freesansbold.ttf', 32)
-title = font.render('Color Flows', True, GREEN, BLUE)
-text_rect_obj = title.get_rect()
-text_rect_obj.center = (400, 150)
+
 
 matrix = Matrix(12)
 palette_list = []
 
-# Render palette of colors
-for x in range(0, len(colors)):
-    square = pygame.Rect(x * 50 + 10, 10, 40, 40)
-    pygame.draw.rect(DISPLAYSURFACE, colors[x], square)
-    palette_list.append(square) 
+
 
 score = 0
 set_adjacent_cells(matrix)
 pygame.display.update()
-prev_color_number = 99
-
+prev_color_number = matrix.get(0, 0).color
+color_number = prev_color_number
 print ##########TEST AREA############
 
 print ##########END TEST AREA###########
 
 ###### Main game loop
 while True:
-    color_number = 99
-    
-    DISPLAYSURFACE.blit(title, text_rect_obj)
     
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -224,19 +235,15 @@ while True:
             counter = 0
             for square in palette_list:
                 if square.collidepoint(mouse_x, mouse_y):
-                    color_number = counter
                     # counter represents index in palette_list
+                    color_number = counter
                     break
                 counter += 1
+            # If chosen color is not the same as before,        
+            if color_number != prev_color_number:
+                traversal_algorithm1(matrix.get(0, 0), int(color_number))
+                score += 1
+                prev_color_number = color_number
 
-    # If chosen color is not the same as before, 
-    if color_number != 99:
-        traversal_algorithm1(matrix.get(0, 0), int(color_number))
-        if color_number != prev_color_number:
-            score += 1
-            prev_color_number = color_number
-    score_str = 'Score: ' + str(score)
-    score_text = font.render(score_str, True, RED, BLACK)
-    score_text.get_rect().center = (400, 190)
-    DISPLAYSURFACE.blit(score_text, (300, 190))
+    
     pygame.display.update()
