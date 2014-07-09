@@ -83,7 +83,7 @@ class MenuScreen(Screen):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.title = self.font.render('Color Flows', True, GREEN, BLUE)
         self.text_rect_obj = self.title.get_rect()
-        self.text_rect_obj.center = (400, 150)
+        self.text_rect_obj.center = (200, 50)
 
     def update(self):
         DISPLAYSURFACE.blit(self.title, self.text_rect_obj)
@@ -91,21 +91,25 @@ class MenuScreen(Screen):
 class PlayScreen(Screen):
     def __init__(self):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
-        
+        # Create squares for palette_list
+        for x in range(0, len(colors)):
+            square = pygame.Rect(x * 50 + 10, 10, 40, 40)
+            palette_list.append(square)
+        # Create back-to-menu surface. 
         exit_to_menu_string = 'Back to menu'
         self.exit_to_menu_surf = self.font.render(exit_to_menu_string, True, RED,
                                                   BLACK)
+        # Since the rectangle inherent inside exit_menu_surf cannot be altered,
+        # a new rectangle is created from the get() function and used for the
+        # positioning of btm surface.
         self.exit_rect = self.exit_to_menu_surf.get_rect()
-        self.exit_rect.center = (200, 350)
-        # Todo random square to get to menu screen
-        self.objects = [pygame.Rect(30, 370, 20, 20)]
+        self.exit_rect.x = 30
+        self.exit_rect.y = 330
 
     def update(self):
-        # Render palette of colors
-        for x in range(0, len(colors)):
-            square = pygame.Rect(x * 50 + 10, 10, 40, 40)
-            pygame.draw.rect(DISPLAYSURFACE, colors[x], square)
-            palette_list.append(square) 
+        # Render color palette
+        for index, palette_square in enumerate(palette_list):            
+            pygame.draw.rect(DISPLAYSURFACE, colors[index], palette_square)
         # Render color grid
         for x in range(0, matrix.length):
             for y in range(0, matrix.length):
@@ -117,8 +121,8 @@ class PlayScreen(Screen):
         score_text_obj = score_text.get_rect()
         score_text_obj.center = (400, 150)
         DISPLAYSURFACE.blit(score_text, score_text_obj)
-        # Render menu button (temporary)
-        DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect.center)
+        # Render back-to-menu button (temporary)                
+        DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect)
 
 
 ###########FUNCTIONS#######################
@@ -258,17 +262,13 @@ while True:
                 score += 1
                 prev_color_number = color_number
             
-            # Todo: encapsulate into Screen object or another object
-            rectangle = current_screen.exit_to_menu_surf.get_rect()
-            print rectangle.x
-            print rectangle.y
-            print rectangle.bottom
-            print rectangle.right
-            print rectangle.width
-            print rectangle.height
+            # Todo: encapsulate into Screen object or another object            
+            rectangle = current_screen.exit_rect
             if rectangle.collidepoint(mouse_x, mouse_y):
                 DISPLAYSURFACE.fill(BLACK)
                 current_screen = menu_screen
 
     current_screen.update()    
     pygame.display.update()
+
+######## End loop ######
