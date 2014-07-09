@@ -82,11 +82,29 @@ class MenuScreen(Screen):
     def __init__(self):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.title = self.font.render('Color Flows', True, GREEN, BLUE)
-        self.text_rect_obj = self.title.get_rect()
-        self.text_rect_obj.center = (200, 50)
+        self.title_rect = self.title.get_rect()
+        self.title_rect.center = (200, 50)
+
+        self.small = self.font.render('Small', True, BLUE, WHITE)
+        self.medium = self.font.render('Medium', True, GREEN, WHITE)
+        self.large = self.font.render('Large', True, RED, WHITE)
+        self.small_rect = self.small.get_rect()
+        self.medium_rect = self.small.get_rect()
+        self.large_rect = self.large.get_rect()
+        self.small_rect.center = (200, 100)
+        self.medium_rect.center = (200, 200)
+        self.large_rect.center = (200, 300)
+        
+        self.menu_screen_objects = [self.title, self.small, self.medium, 
+                                    self.large]
+        
+    def do_mouse_event(self, x, y):
+        for object in menu_screen_objects:
+            if object.collidepoint(x, y):
+                #Todo: implement objects to lead to game screen
 
     def update(self):
-        DISPLAYSURFACE.blit(self.title, self.text_rect_obj)
+        DISPLAYSURFACE.blit(self.title, self.title_rect)
 
 class PlayScreen(Screen):
     def __init__(self):
@@ -97,14 +115,36 @@ class PlayScreen(Screen):
             palette_list.append(square)
         # Create back-to-menu surface. 
         exit_to_menu_string = 'Back to menu'
-        self.exit_to_menu_surf = self.font.render(exit_to_menu_string, True, RED,
-                                                  BLACK)
+        self.exit_to_menu_surf = self.font.render(
+            exit_to_menu_string, True, RED, BLACK)
         # Since the rectangle inherent inside exit_menu_surf cannot be altered,
         # a new rectangle is created from the get() function and used for the
         # positioning of btm surface.
         self.exit_rect = self.exit_to_menu_surf.get_rect()
         self.exit_rect.x = 30
         self.exit_rect.y = 330
+
+    def do_mouse_event(self, x, y):
+        # Establish changing color by using mouse clicked coordinates. 
+        # Counter is the index used to locate color in color list.
+        global color_number
+        global prev_color_number
+        global score
+        if self.exit_rect.collidepoint(x, y):
+            DISPLAYSURFACE.fill(BLACK)
+            global current_screen, menu_screen
+            current_screen = menu_screen
+            #Todo: clear matrix
+        for index, square in enumerate( palette_list):
+            if square.collidepoint(mouse_x, mouse_y):
+                global color_number
+                color_number = index            
+        # If chosen color is not the same as before,        
+        if color_number != prev_color_number:
+            traversal_algorithm1(matrix.get(0, 0), int(color_number))
+            score += 1
+            prev_color_number = color_number
+        
 
     def update(self):
         # Render color palette
@@ -214,7 +254,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-PURPLE = (128, 0, 128)
+PURPLE = (255, 120, 140)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 BROWN = (120, 42, 70)
@@ -233,7 +273,7 @@ color_number = prev_color_number
 
 menu_screen = MenuScreen()
 play_screen = PlayScreen()
-current_screen = play_screen
+current_screen = menu_screen
 print ##########TEST AREA############
 
 print ##########END TEST AREA###########
@@ -246,28 +286,8 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == MOUSEBUTTONUP:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            counter = 0
-            # Establish changing color by using mouse clicked coordinates. 
-            # Counter is the index used to locate color in color list.
-            for square in palette_list:
-                if square.collidepoint(mouse_x, mouse_y):
-                    color_number = counter
-                    break
-                else:
-                    counter += 1
-            # If chosen color is not the same as before,        
-            if color_number != prev_color_number:
-                traversal_algorithm1(matrix.get(0, 0), int(color_number))
-                score += 1
-                prev_color_number = color_number
-            
-            # Todo: encapsulate into Screen object or another object            
-            rectangle = current_screen.exit_rect
-            if rectangle.collidepoint(mouse_x, mouse_y):
-                DISPLAYSURFACE.fill(BLACK)
-                current_screen = menu_screen
-
+            mouse_x, mouse_y = pygame.mouse.get_pos()            
+            current_screen.do_mouse_event(mouse_x, mouse_y)                               
     current_screen.update()    
     pygame.display.update()
 
