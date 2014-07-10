@@ -99,9 +99,13 @@ class MenuScreen(Screen):
                                     self.large]
         
     def do_mouse_event(self, x, y):
-        for object in menu_screen_objects:
-            if object.collidepoint(x, y):
-                #Todo: implement objects to lead to game screen
+        global matrix
+        if self.small_rect.collidepoint(x, y):
+            matrix = Matrix(12)
+            
+        elif self.medium_rect.collidpoint(x, y):
+            
+        set_adjacent_cells(matrix)
 
     def update(self):
         DISPLAYSURFACE.blit(self.title, self.title_rect)
@@ -110,9 +114,10 @@ class PlayScreen(Screen):
     def __init__(self):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         # Create squares for palette_list
+        self.palette_list = []
         for x in range(0, len(colors)):
             square = pygame.Rect(x * 50 + 10, 10, 40, 40)
-            palette_list.append(square)
+            self.palette_list.append(square)
         # Create back-to-menu surface. 
         exit_to_menu_string = 'Back to menu'
         self.exit_to_menu_surf = self.font.render(
@@ -127,28 +132,26 @@ class PlayScreen(Screen):
     def do_mouse_event(self, x, y):
         # Establish changing color by using mouse clicked coordinates. 
         # Counter is the index used to locate color in color list.
-        global color_number
-        global prev_color_number
-        global score
+        global color_number, prev_color_number, score
         if self.exit_rect.collidepoint(x, y):
-            DISPLAYSURFACE.fill(BLACK)
             global current_screen, menu_screen
+            DISPLAYSURFACE.fill(BLACK)
             current_screen = menu_screen
             #Todo: clear matrix
-        for index, square in enumerate( palette_list):
-            if square.collidepoint(mouse_x, mouse_y):
-                global color_number
-                color_number = index            
-        # If chosen color is not the same as before,        
-        if color_number != prev_color_number:
-            traversal_algorithm1(matrix.get(0, 0), int(color_number))
-            score += 1
-            prev_color_number = color_number
+        else:
+            for index, square in enumerate( self.palette_list):
+                if square.collidepoint(mouse_x, mouse_y):                    
+                    color_number = index            
+            # If chosen color is not the same as before,        
+            if color_number != prev_color_number:
+                traversal_algorithm1(matrix.get(0, 0), int(color_number))
+                score += 1
+                prev_color_number = color_number
         
 
     def update(self):
         # Render color palette
-        for index, palette_square in enumerate(palette_list):            
+        for index, palette_square in enumerate(self.palette_list):            
             pygame.draw.rect(DISPLAYSURFACE, colors[index], palette_square)
         # Render color grid
         for x in range(0, matrix.length):
@@ -262,18 +265,20 @@ colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
 #  0     1      2     3       4       5       6
 DISPLAYSURFACE.fill(WHITE)
 
-matrix = Matrix(12)
-palette_list = []
-
-score = 0
-set_adjacent_cells(matrix)
-pygame.display.update()
-prev_color_number = matrix.get(0, 0).color
-color_number = prev_color_number
+#matrix = Matrix(12)
+#set_adjacent_cells(matrix)
+matrix = ""
 
 menu_screen = MenuScreen()
 play_screen = PlayScreen()
 current_screen = menu_screen
+
+score = 0
+pygame.display.update()
+prev_color_number = matrix.get(0, 0).color
+color_number = prev_color_number
+
+
 print ##########TEST AREA############
 
 print ##########END TEST AREA###########
