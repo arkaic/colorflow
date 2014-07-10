@@ -85,9 +85,9 @@ class MenuScreen(Screen):
         self.title_rect = self.title.get_rect()
         self.title_rect.center = (200, 50)
 
-        self.small = self.font.render('Small', True, BLUE, WHITE)
-        self.medium = self.font.render('Medium', True, GREEN, WHITE)
-        self.large = self.font.render('Large', True, RED, WHITE)
+        self.small = self.font.render('Small', True, BLUE, YELLOW)
+        self.medium = self.font.render('Medium', True, GREEN, BLACK)
+        self.large = self.font.render('Large', True, RED, ORANGE)
         self.small_rect = self.small.get_rect()
         self.medium_rect = self.small.get_rect()
         self.large_rect = self.large.get_rect()
@@ -99,16 +99,24 @@ class MenuScreen(Screen):
                                     self.large]
         
     def do_mouse_event(self, x, y):
-        global matrix
+        #Todo: at a later time, move surface fill to updating methods
+        global matrix, current_screen, play_screen
         if self.small_rect.collidepoint(x, y):
             matrix = Matrix(12)
-            
-        elif self.medium_rect.collidpoint(x, y):
-            
-        set_adjacent_cells(matrix)
+            current_screen = play_screen
+            set_adjacent_cells(matrix)
+            DISPLAYSURFACE.fill(WHITE)            
+        elif self.medium_rect.collidepoint(x, y):
+            matrix = Matrix(17)
+            current_screen = play_screen
+            set_adjacent_cells(matrix)
+            DISPLAYSURFACE.fill(WHITE)
 
     def update(self):
         DISPLAYSURFACE.blit(self.title, self.title_rect)
+        DISPLAYSURFACE.blit(self.small, self.small_rect)
+        DISPLAYSURFACE.blit(self.medium, self.medium_rect)
+        DISPLAYSURFACE.blit(self.large, self.large_rect)
 
 class PlayScreen(Screen):
     def __init__(self):
@@ -132,10 +140,12 @@ class PlayScreen(Screen):
     def do_mouse_event(self, x, y):
         # Establish changing color by using mouse clicked coordinates. 
         # Counter is the index used to locate color in color list.
-        global color_number, prev_color_number, score
+        global score
+        prev_color_number = matrix.get(0, 0).color
+        color_number = prev_color_number
         if self.exit_rect.collidepoint(x, y):
             global current_screen, menu_screen
-            DISPLAYSURFACE.fill(BLACK)
+            DISPLAYSURFACE.fill(WHITE)
             current_screen = menu_screen
             #Todo: clear matrix
         else:
@@ -147,7 +157,6 @@ class PlayScreen(Screen):
                 traversal_algorithm1(matrix.get(0, 0), int(color_number))
                 score += 1
                 prev_color_number = color_number
-        
 
     def update(self):
         # Render color palette
@@ -257,7 +266,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-PURPLE = (255, 120, 140)
+PURPLE = (160, 32, 240)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 BROWN = (120, 42, 70)
@@ -265,8 +274,6 @@ colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
 #  0     1      2     3       4       5       6
 DISPLAYSURFACE.fill(WHITE)
 
-#matrix = Matrix(12)
-#set_adjacent_cells(matrix)
 matrix = ""
 
 menu_screen = MenuScreen()
@@ -275,17 +282,9 @@ current_screen = menu_screen
 
 score = 0
 pygame.display.update()
-prev_color_number = matrix.get(0, 0).color
-color_number = prev_color_number
-
-
-print ##########TEST AREA############
-
-print ##########END TEST AREA###########
 
 ###### Main game loop
-while True:
-    
+while True:    
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
