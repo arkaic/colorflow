@@ -1,13 +1,7 @@
 EDIT 5: Prototype largely done. I just need to add in an option to replay the same color grid. Maybe a score tracker as well
 
-Prototyping an idea for a game.
+- This is a clone of Floodit, a popular game where you try to flood a grid of random colors in the fewest tries. 
 
--There is an nxn 2D array with a random color (number) in each cell. 
+- The player chooses from a palette of colors above the grid. Whatever color is chosen, it replaces the top left square and recursively all of its adjacent squares that share the same color. 
 
--When the game is run, player will be prompted to choose from a range of colors (1 - 7). 
-
--The chosen color (number) replaces the color of the upper leftmost (0, 0) cell of the grid, as well as any of its two adjacent cells (right and bottom) if they have the same color as the first. This process is repeated recursively, until all same-color cells that happen to be connected with the first cell are changed into the chosen color. 
-
--Goal of the game is to "white out" the board in the fewest amount of tries.
-
--So far, the basic mechanic has been implemented for console usage. Next step is developing the UI with (preferably) Pygame.
+-Player wins if she can eliminate the entire board under the maximum amount of allowed tries.
