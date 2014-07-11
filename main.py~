@@ -1,16 +1,13 @@
 import pygame, sys, random
 from pygame.locals import *
 
-
-
+# TODOs: 1. Returning to menu deletes grid.
+#        2. Implement maximum score, as well as show it (play screen)
+#        3. Option to start over with new grid, same size (use backup matrix)
+#        4. Option to start over with different grid, same size
+#        5. Repeat 3 and 4 when player loses or wins
+#################CLASSES################
 class Cell: 
-    color = ""
-    x = ""
-    y = ""
-    visited = ""
-    adjacents = ""
-    square = ""
-
     def __init__(self, color, (numx, numy), square):
         self.color = color
         self.x = numx
@@ -47,10 +44,7 @@ class Cell:
         return self.color == 9
 
 class Matrix:
-    array = ""
-    length = ""
-    size = ""
-    uniform_color_count = 0
+#    uniform_color_count = 0
 
     def __init__(self, n):
         self.array = [[0 for x in xrange(int(n))] for y in xrange(int(n))]
@@ -58,6 +52,12 @@ class Matrix:
         self.size = n * n
         # Create and fill matrix
         self._make_array(n)
+        if self.size == 144:
+            self.max_score = 22
+        elif self.size == 289:
+            self.max_score = 30
+        elif self.size == 484
+            self.max_score = 36
 
     # Make squares and random colors for each. Put square in newly created Cell
     # Put new Cell into 2d array. Display the square with a randomly chosen 
@@ -69,7 +69,6 @@ class Matrix:
                 random_color = random.randint(0, 6)
                 square = pygame.Rect(x * 20 + 40, y * 20 + 70, 20, 20)
                 self.array[x][y] = Cell(random_color, (x, y), square)
-                pygame.draw.rect(DISPLAYSURFACE, colors[random_color], square)
 
     def get(self, x, y):
         return self.array[x][y]
@@ -83,6 +82,120 @@ class Matrix:
                 string += '\n'
         return string
 
+# Abstract class
+class Screen:
+    def update(self):
+        raise NotImplementedError('Subclass must implemment abstract method')
+
+# Concrete classes
+class MenuScreen(Screen):
+    def __init__(self):
+        self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.title = self.font.render('Color Flows', True, GREEN, BLUE)
+        self.title_rect = self.title.get_rect()
+        self.title_rect.center = (200, 50)
+
+        self.small = self.font.render('Small', True, BLUE, YELLOW)
+        self.medium = self.font.render('Medium', True, GREEN, BLACK)
+        self.large = self.font.render('Large', True, RED, ORANGE)
+        self.small_rect = self.small.get_rect()
+        self.medium_rect = self.small.get_rect()
+        self.large_rect = self.large.get_rect()
+        self.small_rect.center = (200, 100)
+        self.medium_rect.center = (200, 200)
+        self.large_rect.center = (200, 300)
+        
+        self.menu_screen_objects = [self.title, self.small, self.medium, 
+                                    self.large]
+        
+    def do_mouse_event(self, x, y):
+        #Todo: at a later time, move surface fill to updating methods
+        global matrix, current_screen, play_screen
+        if self.small_rect.collidepoint(x, y):
+            matrix = Matrix(12)
+            backup_matrix = matrix
+            current_screen = play_screen
+            set_adjacent_cells(matrix)
+            DISPLAYSURFACE.fill(WHITE)            
+        elif self.medium_rect.collidepoint(x, y):
+            matrix = Matrix(17)
+            backup_matrix = matrix
+            current_screen = play_screen
+            set_adjacent_cells(matrix)
+            DISPLAYSURFACE.fill(WHITE)
+        elif self.large_rect.collidepoint(x, y):
+            matrix = Matrix(22)
+            backup_matrix = matrix
+            current_screen = play_screen
+            set_adjacent_cells(matrix)
+            DISPLAYSURFACE.fill(WHITE)
+
+    def update(self):
+        DISPLAYSURFACE.blit(self.title, self.title_rect)
+        DISPLAYSURFACE.blit(self.small, self.small_rect)
+        DISPLAYSURFACE.blit(self.medium, self.medium_rect)
+        DISPLAYSURFACE.blit(self.large, self.large_rect)
+
+class PlayScreen(Screen):
+    def __init__(self):
+        self.font = pygame.font.Font('freesansbold.ttf', 32)
+        # Create squares for palette_list
+        self.palette_list = []
+        for x in range(0, len(colors)):
+            square = pygame.Rect(x * 50 + 10, 10, 40, 40)
+            self.palette_list.append(square)
+        # Create back-to-menu surface. 
+        exit_to_menu_string = 'Back to menu'
+        self.exit_to_menu_surf = self.font.render(
+            exit_to_menu_string, True, RED, BLACK)
+        # Since the rectangle inherent inside exit_menu_surf cannot be altered,
+        # a new rectangle is created from the get() function and used for the
+        # positioning of btm surface.
+        self.exit_rect = self.exit_to_menu_surf.get_rect()
+        self.exit_rect.x = 30
+        self.exit_rect.y = 700
+
+    def do_mouse_event(self, x, y):
+        # Establish changing color by using mouse clicked coordinates. 
+        # Counter is the index used to locate color in color list.
+        global score
+        prev_color_number = matrix.get(0, 0).color
+        color_number = prev_color_number
+        if self.exit_rect.collidepoint(x, y):
+            global current_screen, menu_screen
+            DISPLAYSURFACE.fill(WHITE)
+            current_screen = menu_screen
+            #Todo: clear matrix
+        else:
+            for index, square in enumerate( self.palette_list):
+                if square.collidepoint(mouse_x, mouse_y):                    
+                    color_number = index            
+            # If chosen color is not the same as before,        
+            if color_number != prev_color_number:
+                traversal_algorithm1(matrix.get(0, 0), int(color_number))
+                score += 1
+                prev_color_number = color_number
+
+    def update(self):
+        # Render color palette
+        for index, palette_square in enumerate(self.palette_list):            
+            pygame.draw.rect(DISPLAYSURFACE, colors[index], palette_square)
+        # Render color grid
+        for x in range(0, matrix.length):
+            for y in range(0, matrix.length):
+                pygame.draw.rect(DISPLAYSURFACE, colors[matrix.get(x, y).color],
+                                 matrix.get(x, y).square)
+        # Render high score
+        score_str = 'Score: ' + str(score)
+        score_text = self.font.render(score_str, True, RED, BLACK)
+        score_text_obj = score_text.get_rect()
+        score_text_obj.center = (500, 30)
+        DISPLAYSURFACE.blit(score_text, score_text_obj)
+        # Render back-to-menu button (temporary)                
+        DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect)
+
+
+###########FUNCTIONS#######################
 #Make and set adjacents
 def set_adjacent_cells(matrix):
     for x in range(0, matrix.length):
@@ -122,10 +235,11 @@ def set_adjacent_cells(matrix):
 def traversal_algorithm1(cell, fill_color):
     visited_cell_count = 0
     total_cell_count = matrix.length * matrix.length
-    cells_to_visit = [cell]
+    cells_to_visit = [cell] # The Stack.
     visited_cells = [] #To unvisit after the loop
 
     while len(cells_to_visit) > 0 and visited_cell_count <= total_cell_count:    
+        # Skim off any redundant cells on top of the stack. 
         while True:
             if not cells_to_visit:
                 break
@@ -134,6 +248,7 @@ def traversal_algorithm1(cell, fill_color):
                     cells_to_visit.pop()
                 else:
                     break
+        # Stop algorithm if stack is empty
         if not cells_to_visit:
             break
 
@@ -142,85 +257,64 @@ def traversal_algorithm1(cell, fill_color):
         visited_cell_count += 1
         prev_color = current_cell.color
         current_cell.color = fill_color
-        pygame.draw.rect(DISPLAYSURFACE, colors[fill_color], 
-            current_cell.square)
         visited_cells.append(current_cell)
-
-        # counter = 0
+    # prev = red  fill = blue
         for adj_cell in current_cell.adjacents:
             if not adj_cell.is_out_of_bounds():
                 if adj_cell.color == prev_color or adj_cell.color == fill_color:
                     cells_to_visit.append(adj_cell)
+        if len(visited_cells) == matrix.size:
+            break
 
-    matrix.uniform_color_count = len(visited_cells)
-    for visited_cell in visited_cells:
-        visited_cell.unvisit()
+    if len(visited_cells) < matrix.size:
+        for visited_cell in visited_cells:
+            visited_cell.unvisit()
+    else:
+        print 'player won'
 
 
 
 ###############Main Script ####################
 pygame.init()
- 
+
 # Set up window
-DISPLAYSURFACE = pygame.display.set_mode((500, 400), 0, 32)
+DISPLAYSURFACE = pygame.display.set_mode((600, 800), 0, 32)
 pygame.display.set_caption('Color Flow')
 
-# Set up colors
+# Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255) 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-PURPLE = (128, 0, 128)
+PURPLE = (160, 32, 240)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
-BROWN = (165, 42, 42)
+BROWN = (120, 42, 70)
 colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
-        #  0     1      2     3       4       5       6
+#  0     1      2     3       4       5       6
 DISPLAYSURFACE.fill(WHITE)
 
-font = pygame.font.Font('freesansbold.ttf', 32)
-title = font.render('Color Flows', True, GREEN, BLUE)
-text_rect_obj = title.get_rect()
-text_rect_obj.center = (400, 150)
+matrix = ""
+backup_matrix = ""
 
-###### Main game loop
-matrix = Matrix(10)
-palette_list = []
-for x in range(0, len(colors)):
-    square = pygame.Rect(x * 50 + 10, 10, 40, 40)
-    pygame.draw.rect(DISPLAYSURFACE, colors[x], square)
-    palette_list.append(square) 
+menu_screen = MenuScreen()
+play_screen = PlayScreen()
+current_screen = menu_screen
 
 score = 0
-set_adjacent_cells(matrix)
 pygame.display.update()
-prev_color_number = 99
-while True:
-    color_number = 99
-    
-    DISPLAYSURFACE.blit(title, text_rect_obj)
-    
+
+###### Main game loop
+while True:    
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
         elif event.type == MOUSEBUTTONUP:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            counter = 0
-            for square in palette_list:
-                if square.collidepoint(mouse_x, mouse_y):
-                    color_number = counter
-                    break
-                counter += 1
-    if color_number != 99:
-        traversal_algorithm1(matrix.get(0, 0), int(color_number))
-        if color_number != prev_color_number:
-            score += 1
-            prev_color_number = color_number
-    score_str = 'Score: ' + str(score)
-    score_text = font.render(score_str, True, RED, BLACK)
-    score_text.get_rect().center = (400, 190)
-    DISPLAYSURFACE.blit(score_text, (300, 190))
+            mouse_x, mouse_y = pygame.mouse.get_pos()            
+            current_screen.do_mouse_event(mouse_x, mouse_y)                               
+    current_screen.update()    
     pygame.display.update()
 
+######## End loop ######

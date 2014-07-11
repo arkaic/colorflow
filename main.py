@@ -186,13 +186,15 @@ class PlayScreen(Screen):
             DISPLAYSURFACE.fill(WHITE)
             current_screen = menu_screen
             score = 0
+            matrix.isWon = False
+            matrix.isLost = False
             #Todo: clear matrix
         elif matrix.isWon or matrix.isLost:
             # 'You win' or 'You lose' should have appeared. Nothing should be 
             # clickable except exit_to_menu option [Todo: and options to replay
             # same matrix or different matrix of same size]
             # Todo: implement
-            score = 0
+            # score = 0
             return
         else:
             # When player clicks on any of the colors on the palette or nothing
@@ -215,6 +217,7 @@ class PlayScreen(Screen):
                         matrix.isLost = True                
 
     def update(self):
+        global score
         # Render color palette
         for index, palette_square in enumerate(self.palette_list):            
             pygame.draw.rect(DISPLAYSURFACE, colors[index], palette_square)
@@ -223,18 +226,25 @@ class PlayScreen(Screen):
             for y in range(0, matrix.length):
                 pygame.draw.rect(DISPLAYSURFACE, colors[matrix.get(x, y).color],
                                  matrix.get(x, y).square)
+        # Render back-to-menu button (temporary)                
+        DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect)
         # Render high score
         score_str = 'Score: ' + str(score) + '/' + str(matrix.max_score)
         score_text = self.font.render(score_str, True, RED, BLACK)
         score_text_obj = score_text.get_rect()
         score_text_obj.center = (500, 30)
-        DISPLAYSURFACE.blit(score_text, score_text_obj)
-        # Render back-to-menu button (temporary)                
-        DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect)
-        if matrix.isWon:
-            DISPLAYSURFACE.blit(self.win_text, self.win_text_rect)
-        elif matrix.isLost:
-            DISPLAYSURFACE.blit(self.lose_text, self.lose_text_rect)
+        DISPLAYSURFACE.blit(score_text, score_text_obj) 
+        if matrix.isWon or matrix.isLost:
+            # score_text = self.font.render(
+            #     'Score: ' + str(score) + '/' +  str(matrix.max_score), 
+            #     True, RED, BLACK)
+            # score_text_obj = score_text.get_rect()
+            # score_text_obj.center = (500, 30)
+            if matrix.isWon:
+                DISPLAYSURFACE.blit(self.win_text, self.win_text_rect)
+            elif matrix.isLost:
+                DISPLAYSURFACE.blit(self.lose_text, self.lose_text_rect)       
+
 
 class ResultsScreen(Screen):
     def do_mouse_event(self, x, y):
