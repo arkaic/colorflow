@@ -52,14 +52,16 @@ class Matrix:
         self.size = n * n
         # Create and fill matrix
         self._make_array(n)
-        if n = 12:
+        if n == 12:
             self.max_score = 22
-        elif n = 17:
+        elif n == 17:
             self.max_score = 30
-        elif n = 22:
+        elif n == 22:
             self.max_score = 36
         # How much flow that is connected to the upper left
         self.flood_count = 0   
+        self.isWon = False
+        self.isLost = False
 
     # Make squares and random colors for each. Put square in newly created Cell
     # Put new Cell into 2d array. Display the square with a randomly chosen 
@@ -89,7 +91,8 @@ class Matrix:
 class Screen:
     def update(self):
         raise NotImplementedError('Subclass must implemment abstract method')
-
+    def do_mouse_event(self, x, y):
+        raise NotImplementedError('Subclass must implement abstract method')
 
 # Concrete classes
 # Menu screen
@@ -151,6 +154,7 @@ class PlayScreen(Screen):
         for x in range(0, len(colors)):
             square = pygame.Rect(x * 50 + 10, 10, 40, 40)
             self.palette_list.append(square)
+
         # Create back-to-menu surface. 
         exit_to_menu_string = 'Back to menu'
         self.exit_to_menu_surf = self.font.render(
@@ -162,6 +166,14 @@ class PlayScreen(Screen):
         self.exit_rect.x = 30
         self.exit_rect.y = 700
 
+        # Create You win and You lose texts on retainer
+        self.win_text = self.font.render('You win', True, YELLOW, GREEN)
+        self.win_text_rect = self.win_text.get_rect()
+        self.win_text_rect.center = (300, 400)
+        self.lose_text = self.font.render('You lose', True, RED, BLACK)
+        self.lose_text_rect = self.lose_text.get_rect()
+        self.lose_text_rect.center = (300, 400)
+
     def do_mouse_event(self, x, y):
         # Establish changing color by using mouse clicked coordinates. 
         # Counter is the index used to locate color in color list.
@@ -169,11 +181,21 @@ class PlayScreen(Screen):
         prev_color_number = matrix.get(0, 0).color
         color_number = prev_color_number
         if self.exit_rect.collidepoint(x, y):
+            # When exit to menu is clicked
             global current_screen, menu_screen
             DISPLAYSURFACE.fill(WHITE)
             current_screen = menu_screen
+            score = 0
             #Todo: clear matrix
+        elif matrix.isWon or matrix.isLost:
+            # 'You win' or 'You lose' should have appeared. Nothing should be 
+            # clickable except exit_to_menu option [Todo: and options to replay
+            # same matrix or different matrix of same size]
+            # Todo: implement
+            score = 0
+            return
         else:
+            # When player clicks on any of the colors on the palette or nothing
             for index, square in enumerate( self.palette_list):
                 if square.collidepoint(mouse_x, mouse_y):                    
                     color_number = index            
@@ -181,7 +203,16 @@ class PlayScreen(Screen):
             if color_number != prev_color_number:
                 traversal_algorithm1(matrix.get(0, 0), int(color_number))
                 score += 1
-                prev_color_number = color_number
+                prev_color_number = color_number                
+                # Todo: high score keeping
+                if score < matrix.max_score:
+                    if matrix.flood_count == matrix.size:
+                        matrix.isWon = True
+                elif score == matrix.max_score:
+                    if matrix.flood_count == matrix.size:
+                        matrix.isWon = True
+                    else:
+                        matrix.isLost = True                
 
     def update(self):
         # Render color palette
@@ -193,13 +224,34 @@ class PlayScreen(Screen):
                 pygame.draw.rect(DISPLAYSURFACE, colors[matrix.get(x, y).color],
                                  matrix.get(x, y).square)
         # Render high score
-        score_str = 'Score: ' + str(score)
+        score_str = 'Score: ' + str(score) + '/' + str(matrix.max_score)
         score_text = self.font.render(score_str, True, RED, BLACK)
         score_text_obj = score_text.get_rect()
         score_text_obj.center = (500, 30)
         DISPLAYSURFACE.blit(score_text, score_text_obj)
         # Render back-to-menu button (temporary)                
         DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect)
+        if matrix.isWon:
+            DISPLAYSURFACE.blit(self.win_text, self.win_text_rect)
+        elif matrix.isLost:
+            DISPLAYSURFACE.blit(self.lose_text, self.lose_text_rect)
+
+class ResultsScreen(Screen):
+    def do_mouse_event(self, x, y):
+        return
+
+    def update(self):
+        global matrix, current_screen, menu_screen
+        if matrix.isWon:
+            win_str = 'You win'
+            win_text = self.font.render(win_str, True, YELLOW, GREEN)
+            win_text_rect = wint_text.get_rect()
+            win_text_rect.center = (300, 400)
+            DISPLAYSURFACE.blit(win_text, win_text_rect)
+            current_screen = menu_screen 
+        elif matrix.isLose:
+            return
+            
 
 
 ###########FUNCTIONS#######################
