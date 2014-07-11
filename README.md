@@ -1,6 +1,4 @@
-EDIT:   Final score sometimes not right; still needs fixing.
-EDIT 2: Final score fixed, plus a few polishes.
-EDIT 3: Pygame brought in. Implemented a simple version of the game graphically.
+EDIT 5: Prototype largely done. I just need to add in an option to replay the same color grid. Maybe a score tracker as well
 
 Prototyping an idea for a game.
 
