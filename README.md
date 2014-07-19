@@ -1,4 +1,4 @@
-EDIT 5: Prototype largely done. I just need to add in an option to replay the same color grid. Maybe a score tracker as well
+EDIT 5: Prototype done. Replaying the board works.
 
 - This is a clone of Floodit, a popular game where you try to flood a grid of random colors in the fewest tries. 
 
