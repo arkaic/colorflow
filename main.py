@@ -48,7 +48,7 @@ class Matrix:
         # The array is two-dimensional, holding the Cells that represent the
         # squares.
         self.array = [[0 for x in xrange(int(n))] for y in xrange(int(n))]
-        self.init_array_specs = [[0 for x in xrange(int(n))] for y in 
+        self._init_array_specs = [[0 for x in xrange(int(n))] for y in 
                                 xrange(int(n))]
         self.length = n
         self.size = n * n
@@ -65,17 +65,23 @@ class Matrix:
         self.isWon = False
         self.isLost = False
 
-    # Make squares and random colors for each. Put square in newly created Cell
+    # Make squares and random colors for each. Put square in newly created Cell.
     # Put new Cell into 2d array. Display the square with a randomly chosen 
     # color.
     def _make_array(self, n):
-        random.seed()
         for x in range(0, n):
             for y in range(0, n):
                 random_color = random.randint(0, 6)
                 square = pygame.Rect(x * 20 + 40, y * 20 + 70, 20, 20)
                 self.array[x][y] = Cell(random_color, (x, y), square)
-                self.init_array_specs[x][y] = random_color
+                self._init_array_specs[x][y] = random_color
+
+    def restore_init_array(self):
+        for x in range(0, self.length):
+            for y in range(0, self.length):
+                square = pygame.Rect(x * 20 + 40, y * 20 + 70, 20, 20)
+                self.array[x][y] = Cell(self._init_array_specs[x][y], (x, y), 
+                                        square)
 
     def get(self, x, y):
         return self.array[x][y]
@@ -170,7 +176,7 @@ class PlayScreen(Screen):
         # Create replay grid surface
         self.replay_surf = self.font.render('Replay board', True, RED, BLACK)
         self.replay_rect = self.replay_surf.get_rect()
-        self.replay_rect.center = (60, 700)
+        self.replay_rect.center = (400, 700)
 
         # Create You win and You lose texts on retainer
         self.win_text = self.font.render('You win', True, YELLOW, GREEN)
@@ -195,9 +201,16 @@ class PlayScreen(Screen):
             matrix.isWon = False
             matrix.isLost = False
         elif self.replay_rect.collidepoint(x, y):
-            #Todo reset the matrix
-        else:
-            # When player clicks on any of the colors on the palette or nothing
+            DISPLAYSURFACE.fill(WHITE)
+            matrix.restore_init_array()
+            set_adjacent_cells(matrix)
+            score = 0
+            prev_color_number = matrix.get(0, 0).color
+            color_number = prev_color_number
+            matrix.isWon = False
+            matrix.isLost = False
+        elif not matrix.isWon and not matrix.isLost:
+            # else, if matrix is still in play (not lost or won)
             for index, square in enumerate( self.palette_list):
                 if square.collidepoint(mouse_x, mouse_y):                    
                     color_number = index            
@@ -226,21 +239,18 @@ class PlayScreen(Screen):
             for y in range(0, matrix.length):
                 pygame.draw.rect(DISPLAYSURFACE, colors[matrix.get(x, y).color],
                                  matrix.get(x, y).square)
-        # Render back-to-menu button (temporary)                
+        # Render back-to-menu button
         DISPLAYSURFACE.blit(self.exit_to_menu_surf, self.exit_rect)
+        # Render replay button
+        DISPLAYSURFACE.blit(self.replay_surf, self.replay_rect)
         # Render high score
         score_str = 'Score: ' + str(score) + '/' + str(matrix.max_score)
         score_text = self.font.render(score_str, True, RED, BLACK)
         score_text_obj = score_text.get_rect()
         score_text_obj.center = (500, 30)
         DISPLAYSURFACE.blit(score_text, score_text_obj) 
-        if matrix.isWon or matrix.isLost:
-            # score_text = self.font.render(
-            #     'Score: ' + str(score) + '/' +  str(matrix.max_score), 
-            #     True, RED, BLACK)
-            # score_text_obj = score_text.get_rect()
-            # score_text_obj.center = (500, 30)
-            # todo: display replay text
+        # If player wins or loses, render 'Win' or 'Lose' signs.
+        if matrix.isWon or matrix.isLost:            
             if matrix.isWon:
                 DISPLAYSURFACE.blit(self.win_text, self.win_text_rect)
             elif matrix.isLost:
