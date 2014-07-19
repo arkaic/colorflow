@@ -3,7 +3,10 @@ import pygame, sys, random
 from pygame.locals import *
 
 # TODOs: 1. Returning to menu deletes grid.
+#        2. Implement maximum score, as well as show it (play screen)
 #        3. Option to start over with new grid, same size (use backup matrix)
+#        4. Option to start over with different grid, same size
+#        5. Repeat 3 and 4 when player loses or wins
 #################CLASSES################
 class Cell: 
     def __init__(self, color, (numx, numy), square):
@@ -45,10 +48,8 @@ class Cell:
 # Encapsulates matrix
 class Matrix:
     def __init__(self, n):
-        # The array is two-dimensional, holding the Cells that represent the
-        # squares.
         self.array = [[0 for x in xrange(int(n))] for y in xrange(int(n))]
-        self.init_array_specs = [[0 for x in xrange(int(n))] for y in 
+        self.init_array_specs = [[0 for x in xrange(int(n)))] for y in 
                                 xrange(int(n))]
         self.length = n
         self.size = n * n
@@ -124,6 +125,7 @@ class MenuScreen(Screen):
         global matrix, current_screen, play_screen
         if self.small_rect.collidepoint(x, y):
             matrix = Matrix(12)
+            backup_matrix = matrix #todo change because it refers to same
             current_screen = play_screen
             set_adjacent_cells(matrix)
             DISPLAYSURFACE.fill(WHITE)            
@@ -158,19 +160,15 @@ class PlayScreen(Screen):
             self.palette_list.append(square)
 
         # Create back-to-menu surface. 
-        self.exit_to_menu_surf = self.font.render('Back to menu', True, RED, 
-                                                  BLACK)
+        exit_to_menu_string = 'Back to menu'
+        self.exit_to_menu_surf = self.font.render(
+            exit_to_menu_string, True, RED, BLACK)
         # Since the rectangle inherent inside exit_menu_surf cannot be altered,
         # a new rectangle is created from the get() function and used for the
         # positioning of btm surface.
         self.exit_rect = self.exit_to_menu_surf.get_rect()
         self.exit_rect.x = 30
         self.exit_rect.y = 700
-
-        # Create replay grid surface
-        self.replay_surf = self.font.render('Replay board', True, RED, BLACK)
-        self.replay_rect = self.replay_surf.get_rect()
-        self.replay_rect.center = (60, 700)
 
         # Create You win and You lose texts on retainer
         self.win_text = self.font.render('You win', True, YELLOW, GREEN)
@@ -194,8 +192,15 @@ class PlayScreen(Screen):
             score = 0
             matrix.isWon = False
             matrix.isLost = False
-        elif self.replay_rect.collidepoint(x, y):
-            #Todo reset the matrix
+            #Todo: clear matrix
+        elif matrix.isWon or matrix.isLost:
+            # 'You win' or 'You lose' should have appeared. Nothing should be 
+            # clickable except exit_to_menu option [Todo: and options to replay
+            # same matrix or different matrix of same size]
+            # Todo: implement when "replay grid" collidepoints, it should 
+            # reinstate backup grid stored in matrix class. 
+            # score = 0
+            return
         else:
             # When player clicks on any of the colors on the palette or nothing
             for index, square in enumerate( self.palette_list):
@@ -206,7 +211,7 @@ class PlayScreen(Screen):
                 traversal_algorithm1(matrix.get(0, 0), int(color_number))
                 score += 1
                 prev_color_number = color_number                
-                # Todo dream: high score keeping
+                # Todo: high score keeping
                 if score < matrix.max_score:
                     if matrix.flood_count == matrix.size:
                         matrix.isWon = True
@@ -245,6 +250,24 @@ class PlayScreen(Screen):
                 DISPLAYSURFACE.blit(self.win_text, self.win_text_rect)
             elif matrix.isLost:
                 DISPLAYSURFACE.blit(self.lose_text, self.lose_text_rect)       
+
+
+class ResultsScreen(Screen):
+    def do_mouse_event(self, x, y):
+        return
+
+    def update(self):
+        global matrix, current_screen, menu_screen
+        if matrix.isWon:
+            win_str = 'You win'
+            win_text = self.font.render(win_str, True, YELLOW, GREEN)
+            win_text_rect = wint_text.get_rect()
+            win_text_rect.center = (300, 400)
+            DISPLAYSURFACE.blit(win_text, win_text_rect)
+            current_screen = menu_screen 
+        elif matrix.isLose:
+            return
+            
 
 
 ###########FUNCTIONS#######################

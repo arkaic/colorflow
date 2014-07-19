@@ -1,4 +1,4 @@
 #!/bin/sh
-chmod u+x /Users/henry/Dropbox/#Programming/pythonstuff/colorflowgame/colorflow
+chmod u+x /Users/henry/Dropbox/#Programming/pythonstuff/colorflowgame/runcolorflow
 cd /Users/henry/Dropbox/#Programming/pythonstuff/colorflowgame/
 arch -i386 python main.py
