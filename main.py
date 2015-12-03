@@ -1,10 +1,26 @@
 #! /usr/bin/env arch -i386 python
+
+""" TODOs: 1. Returning to menu deletes grid.
+        3. Option to start over with new grid, same size (use backup matrix)
+"""
+
 import pygame, sys, random
 from pygame.locals import *
 
-# TODOs: 1. Returning to menu deletes grid.
-#        3. Option to start over with new grid, same size (use backup matrix)
-#################CLASSES################
+# Define color constants
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255) 
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+PURPLE = (160, 32, 240)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 165, 0)
+BROWN = (120, 42, 70)
+
+################################################################################
+#                               Classes                                        #
+################################################################################
 class Cell: 
     def __init__(self, color, (numx, numy), square):
         self.color = color
@@ -42,8 +58,9 @@ class Cell:
         return self.color == 9
 
 
-# Encapsulates matrix
 class Matrix:
+    """ Game grid """
+
     def __init__(self, n):
         # The array is two-dimensional, holding the Cells that represent the
         # squares.
@@ -96,16 +113,17 @@ class Matrix:
         return string
 
 
-# Abstract class
 class Screen:
+    """ Base abstract class for screens """
     def update(self):
         raise NotImplementedError('Subclass must implemment abstract method')
     def do_mouse_event(self, x, y):
         raise NotImplementedError('Subclass must implement abstract method')
 
-# Concrete classes
-# Menu screen
+
 class MenuScreen(Screen):
+    """ Menu screen """
+
     def __init__(self):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         self.title = self.font.render('Color Flows', True, GREEN, BLUE)
@@ -153,8 +171,9 @@ class MenuScreen(Screen):
         DISPLAYSURFACE.blit(self.large, self.large_rect)
 
 
-# Gameplay screen
 class PlayScreen(Screen):
+    """ Gameplay screen """
+
     def __init__(self):
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         # Create squares for palette_list
@@ -187,8 +206,9 @@ class PlayScreen(Screen):
         self.lose_text_rect.center = (300, 400)
 
     def do_mouse_event(self, x, y):
-        # Establish changing color by using mouse clicked coordinates. 
-        # Counter is the index used to locate color in color list.
+        """Establish changing color by using mouse clicked coordinates. 
+        Counter is the index used to locate color in color list.
+        """
         global score
         prev_color_number = matrix.get(0, 0).color
         color_number = prev_color_number
@@ -257,8 +277,9 @@ class PlayScreen(Screen):
                 DISPLAYSURFACE.blit(self.lose_text, self.lose_text_rect)       
 
 
-###########FUNCTIONS#######################
-#Make and set adjacents
+################################################################################
+#                               Functions                                      #
+################################################################################
 def set_adjacent_cells(matrix):
     for x in range(0, matrix.length):
         for y in range(0, matrix.length):
@@ -288,13 +309,14 @@ def set_adjacent_cells(matrix):
             else:
                 cell.set_adjacent(matrix.get(xw, y), "W")
 
-##Depth First Search
-# Non-recursive implementation. unvisited_cells will be the stack that takes in 
-# cells that are adjacent to the current cell. At each iteration of the while 
-# loop, all consecutive cells on top of the stack that are already visited will 
-# be removed. The next cell on top of the stack, hence, is unvisited. It will be
-# set to "visited" and then all of its adjacent cells are added onto the stack. 
 def traversal_algorithm1(cell, fill_color):
+    """ Depth First Search
+    Non-recursive implementation. unvisited_cells will be the stack that takes in 
+    cells that are adjacent to the current cell. At each iteration of the while 
+    loop, all consecutive cells on top of the stack that are already visited will 
+    be removed. The next cell on top of the stack, hence, is unvisited. It will be
+    set to "visited" and then all of its adjacent cells are added onto the stack. 
+    """
     visited_cell_count = 0
     total_cell_count = matrix.length * matrix.length
     cells_to_visit = [cell] # The Stack.
@@ -335,47 +357,38 @@ def traversal_algorithm1(cell, fill_color):
     matrix.flood_count = len(visited_cells)
 
 
-###############Main Script ####################
-pygame.init()
+################################################################################
+#                               Main Script                                    #
+################################################################################
+if __name__ == '__main__':
+    pygame.init()
 
-# Set up window
-DISPLAYSURFACE = pygame.display.set_mode((600, 800), 0, 32)
-pygame.display.set_caption('Color Flow')
+    # Set up window
+    DISPLAYSURFACE = pygame.display.set_mode((600, 800), 0, 32)
+    pygame.display.set_caption('Color Flow')
 
-# Define colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255) 
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-PURPLE = (160, 32, 240)
-YELLOW = (255, 255, 0)
-ORANGE = (255, 165, 0)
-BROWN = (120, 42, 70)
-colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
-#  0     1      2     3       4       5       6
-DISPLAYSURFACE.fill(WHITE)
+    colors = [RED, GREEN, BLUE, PURPLE, YELLOW, ORANGE, BROWN]
+    #  0     1      2     3       4       5       6
+    DISPLAYSURFACE.fill(WHITE)
 
-matrix = ""
-backup_matrix = ""
+    matrix = ""
+    backup_matrix = ""
 
-menu_screen = MenuScreen()
-play_screen = PlayScreen()
-current_screen = menu_screen
+    menu_screen = MenuScreen()
+    play_screen = PlayScreen()
+    current_screen = menu_screen
 
-score = 0
-pygame.display.update()
-
-###### Main game loop
-while True:    
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-        elif event.type == MOUSEBUTTONUP:
-            mouse_x, mouse_y = pygame.mouse.get_pos()            
-            current_screen.do_mouse_event(mouse_x, mouse_y)                               
-    current_screen.update()    
+    score = 0
     pygame.display.update()
 
-######## End loop ######
+    # Main loop
+    while True:    
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == MOUSEBUTTONUP:
+                mouse_x, mouse_y = pygame.mouse.get_pos()            
+                current_screen.do_mouse_event(mouse_x, mouse_y)                               
+        current_screen.update()    
+        pygame.display.update()
