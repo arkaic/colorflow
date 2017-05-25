@@ -6,4 +6,10 @@
 
 - Player wins if she can eliminate the entire board under the maximum amount of allowed tries.
 
-- Requires pygame and python2 to run
+To run:
+
+```
+./buildrun.sh
+```
+
+It will pip install virtualenv, then within the python virtual environment, install pygame, then runs the game.
