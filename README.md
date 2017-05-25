@@ -1,4 +1,4 @@
-**Progress:** Prototype done. Replaying the board works.
+# COLOR FLOW
 
 - This is a clone of Floodit, a popular game where you try to flood a grid of random colors in the fewest tries. 
 
